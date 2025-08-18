@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "Favospace mini",
+  "version": "1.0",
+  "description": "Remplace la page nouvel onglet par une interface élégante pour gérer tes favoris",
+  
+  "permissions": [
+    "bookmarks",
+    "storage"
+  ],
+  
+  "chrome_url_overrides": {
+    "newtab": "newtab.html"
+  },
+  
+  "action": {
+    "default_title": "Gestionnaire de Favoris"
+  },
+   "icons": {
+    "128": "logo-fs.png"
+  }
+}

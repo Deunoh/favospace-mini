@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Favospace mini</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Favospace <span id="mini-title">mini</span></h1>
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="Rechercher dans les favoris...">
+                <button id="addBookmarkBtn" class="btn-primary">+ Ajouter un favori</button>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div id="bookmarksContainer" class="bookmarks-container">
+                <!-- Les favoris seront chargés ici -->
+            </div>
+        </main>
+
+        <!-- Modal pour ajouter/modifier un favori -->
+        <div id="bookmarkModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2 id="modalTitle">Ajouter un favori</h2>
+                <form id="bookmarkForm">
+                    <div class="form-group">
+                        <label for="bookmarkTitle">Titre:</label>
+                        <input type="text" id="bookmarkTitle" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="bookmarkUrl">URL:</label>
+                        <input type="url" id="bookmarkUrl" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="bookmarkFolder">Dossier parent:</label>
+                        <select id="bookmarkFolder">
+                            <!-- Les dossiers seront chargés ici -->
+                        </select>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" id="cancelBtn" class="btn-secondary">Annuler</button>
+                        <button type="submit" class="btn-primary">Sauvegarder</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Modal de confirmation de suppression -->
+        <div id="deleteModal" class="modal">
+            <div class="modal-content">
+                <h2>Confirmer la suppression</h2>
+                <p>Êtes-vous sûr de vouloir supprimer ce favori ?</p>
+                <div class="form-actions">
+                    <button id="cancelDeleteBtn" class="btn-secondary">Annuler</button>
+                    <button id="confirmDeleteBtn" class="btn-danger">Supprimer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="newtab.js"></script>
+</body>
+</html>
