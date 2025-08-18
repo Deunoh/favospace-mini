@@ -3,6 +3,7 @@ class BookmarkManager {
         this.bookmarks = [];
         this.currentEditId = null;
         this.currentDeleteId = null;
+        this.allFoldersExpanded = false;
         this.init();
     }
 
@@ -29,12 +30,14 @@ class BookmarkManager {
 
         // Modal d'ajout de favori
         const addBtn = document.getElementById('addBookmarkBtn');
+        const toggleAllBtn = document.getElementById('toggleAllBtn');
         const modal = document.getElementById('bookmarkModal');
         const closeBtn = modal.querySelector('.close');
         const cancelBtn = document.getElementById('cancelBtn');
         const form = document.getElementById('bookmarkForm');
 
         addBtn.addEventListener('click', () => this.showAddModal());
+        toggleAllBtn.addEventListener('click', () => this.toggleAllFolders());
         closeBtn.addEventListener('click', () => this.hideModal());
         cancelBtn.addEventListener('click', () => this.hideModal());
         
@@ -107,7 +110,7 @@ class BookmarkManager {
         const bookmarkCount = this.countBookmarks(folder);
         
         const folderDiv = document.createElement('div');
-        folderDiv.className = 'folder' + (collapsedByDefault ? ' collapsed' : '');
+        folderDiv.className = 'folder' + (collapsedByDefault && !this.allFoldersExpanded ? ' collapsed' : '');
         folderDiv.innerHTML = `
             <div class="folder-header">
                 <span class="folder-icon">📁</span>
@@ -326,7 +329,7 @@ class BookmarkManager {
                     await chrome.bookmarks.move(this.currentEditId, { parentId });
                 }
             } else {
-                // Création d’un nouveau favori
+                // Création d'un nouveau favori
                 await chrome.bookmarks.create({
                     parentId: parentId,
                     title: title,
@@ -418,6 +421,25 @@ class BookmarkManager {
             "'": '&#039;'
         };
         return text.replace(/[&<>"']/g, (m) => map[m]);
+    }
+
+    toggleAllFolders() {
+        const folders = document.querySelectorAll('.folder');
+        const toggleBtn = document.getElementById('toggleAllBtn');
+        
+        if (this.allFoldersExpanded) {
+            // Fermer tous les dossiers
+            folders.forEach(folder => folder.classList.add('collapsed'));
+            this.allFoldersExpanded = false;
+            toggleBtn.textContent = '📁 Tout ouvrir';
+            toggleBtn.title = 'Ouvrir tous les dossiers';
+        } else {
+            // Ouvrir tous les dossiers
+            folders.forEach(folder => folder.classList.remove('collapsed'));
+            this.allFoldersExpanded = true;
+            toggleBtn.textContent = '📂 Tout fermer';
+            toggleBtn.title = 'Fermer tous les dossiers';
+        }
     }
 }
 
