@@ -109,27 +109,43 @@ class BookmarkManager {
     }
 
     renderBookmarkNodes(nodes, container, level = 0) {
+        // Séparer les favoris (liens) et les dossiers
+        const bookmarks = [];
+        const folders = [];
+        
         nodes.forEach(node => {
-            if (node.children) {
-                // Vérifie si c'est le dossier racine artificiel
-                const isRoot = !node.title && level === 0;
+            if (node.url) {
+                // C'est un favori (lien)
+                bookmarks.push(node);
+            } else if (node.children) {
+                // C'est un dossier
+                folders.push(node);
+            }
+        });
 
-                if (!isRoot && node.title) {
-                    // Crée un dossier repliable
-                    const folderElement = this.createFolderElement(node, level === 0 ? false : true);
-                    container.appendChild(folderElement);
+        // Afficher d'abord tous les favoris (liens)
+        bookmarks.forEach(bookmark => {
+            const bookmarkElement = this.createBookmarkElement(bookmark);
+            container.appendChild(bookmarkElement);
+        });
 
-                    if (node.children.length > 0) {
-                        const folderContent = folderElement.querySelector('.folder-content');
-                        this.renderBookmarkNodes(node.children, folderContent, level + 1);
-                    }
-                } else {
-                    // Si root artificiel → afficher seulement ses enfants
-                    this.renderBookmarkNodes(node.children, container, level);
+        // Ensuite afficher tous les dossiers
+        folders.forEach(folder => {
+            // Vérifie si c'est le dossier racine artificiel
+            const isRoot = !folder.title && level === 0;
+
+            if (!isRoot && folder.title) {
+                // Crée un dossier repliable
+                const folderElement = this.createFolderElement(folder, level === 0 ? false : true);
+                container.appendChild(folderElement);
+
+                if (folder.children.length > 0) {
+                    const folderContent = folderElement.querySelector('.folder-content');
+                    this.renderBookmarkNodes(folder.children, folderContent, level + 1);
                 }
-            } else if (node.url) {
-                const bookmarkElement = this.createBookmarkElement(node);
-                container.appendChild(bookmarkElement);
+            } else {
+                // Si root artificiel → afficher seulement ses enfants
+                this.renderBookmarkNodes(folder.children, container, level);
             }
         });
     }
