@@ -26,8 +26,15 @@ class BookmarkManager {
     setupEventListeners() {
         // Recherche
         const searchInput = document.getElementById('searchInput');
+        const clearSearchBtn = document.getElementById('clearSearchBtn');
+        
         searchInput.addEventListener('input', (e) => {
             this.filterBookmarks(e.target.value);
+            this.updateClearSearchButton(e.target.value);
+        });
+
+        clearSearchBtn.addEventListener('click', () => {
+            this.clearSearch();
         });
 
         // Modal d'ajout de favori
@@ -497,6 +504,23 @@ class BookmarkManager {
 
         const filtered = this.searchInBookmarks(this.bookmarks, searchTerm.toLowerCase());
         this.renderBookmarks(filtered);
+    }
+
+    clearSearch() {
+        const searchInput = document.getElementById('searchInput');
+        searchInput.value = '';
+        this.updateClearSearchButton('');
+        this.renderBookmarks();
+        searchInput.focus();
+    }
+
+    updateClearSearchButton(searchValue) {
+        const clearSearchBtn = document.getElementById('clearSearchBtn');
+        if (searchValue.trim()) {
+            clearSearchBtn.style.display = 'flex';
+        } else {
+            clearSearchBtn.style.display = 'none';
+        }
     }
 
     searchInBookmarks(nodes, searchTerm) {
