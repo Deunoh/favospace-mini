@@ -41,9 +41,24 @@
                     </div>
                     <div class="form-group">
                         <label for="bookmarkFolder">Dossier parent:</label>
-                        <select id="bookmarkFolder">
-                            <!-- Les dossiers seront chargés ici -->
-                        </select>
+                        <div class="folder-selection">
+                            <select id="bookmarkFolder">
+                                <!-- Les dossiers seront chargés ici -->
+                            </select>
+                            <button type="button" id="createFolderBtn" class="btn-secondary create-folder-btn">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                                    <line x1="12" y1="11" x2="12" y2="17"></line>
+                                    <line x1="9" y1="14" x2="15" y2="14"></line>
+                                </svg>
+                                Nouveau dossier
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group" id="newFolderGroup" style="display: none;">
+                        <label for="newFolderName">Nom du nouveau dossier:</label>
+                        <input type="text" id="newFolderName" placeholder="Entrez le nom du dossier">
+                        <button type="button" id="cancelNewFolderBtn" class="btn-link">Annuler</button>
                     </div>
                     <div class="form-actions">
                         <button type="button" id="cancelBtn" class="btn-secondary">Annuler</button>

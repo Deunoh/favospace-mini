@@ -51,6 +51,13 @@ class BookmarkManager {
         // Formu favori
         form.addEventListener('submit', (e) => this.handleFormSubmit(e));
 
+        // Bouton créer un nouveau dossier
+        const createFolderBtn = document.getElementById('createFolderBtn');
+        const cancelNewFolderBtn = document.getElementById('cancelNewFolderBtn');
+        
+        createFolderBtn.addEventListener('click', () => this.showCreateFolderForm());
+        cancelNewFolderBtn.addEventListener('click', () => this.hideCreateFolderForm());
+
         // Modal de suppression
         const deleteModal = document.getElementById('deleteModal');
         const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
@@ -338,6 +345,33 @@ class BookmarkManager {
     hideModal() {
         const modal = document.getElementById('bookmarkModal');
         modal.classList.remove('show');
+        // Réinitialiser le formulaire de création de dossier
+        this.hideCreateFolderForm();
+    }
+
+    showCreateFolderForm() {
+        const newFolderGroup = document.getElementById('newFolderGroup');
+        const createFolderBtn = document.getElementById('createFolderBtn');
+        const folderSelect = document.getElementById('bookmarkFolder');
+        
+        newFolderGroup.style.display = 'block';
+        createFolderBtn.style.display = 'none';
+        folderSelect.disabled = true;
+        
+        // Focus sur le champ de nom du dossier
+        document.getElementById('newFolderName').focus();
+    }
+
+    hideCreateFolderForm() {
+        const newFolderGroup = document.getElementById('newFolderGroup');
+        const createFolderBtn = document.getElementById('createFolderBtn');
+        const folderSelect = document.getElementById('bookmarkFolder');
+        const newFolderName = document.getElementById('newFolderName');
+        
+        newFolderGroup.style.display = 'none';
+        createFolderBtn.style.display = 'flex';
+        folderSelect.disabled = false;
+        newFolderName.value = '';
     }
 
     showDeleteModal(bookmarkId) {
@@ -356,7 +390,8 @@ class BookmarkManager {
         
         const title = document.getElementById('bookmarkTitle').value.trim();
         const url = document.getElementById('bookmarkUrl').value.trim();
-        const parentId = document.getElementById('bookmarkFolder').value;
+        const newFolderName = document.getElementById('newFolderName').value.trim();
+        let parentId = document.getElementById('bookmarkFolder').value;
 
         if (!title || !url) {
             alert('Veuillez remplir tous les champs');
@@ -364,6 +399,23 @@ class BookmarkManager {
         }
 
         try {
+            // Si on crée un nouveau dossier
+            if (newFolderName) {
+                if (!newFolderName.trim()) {
+                    alert('Veuillez entrer un nom pour le nouveau dossier');
+                    return;
+                }
+                
+                // Créer le nouveau dossier
+                const newFolder = await chrome.bookmarks.create({
+                    parentId: parentId,
+                    title: newFolderName
+                });
+                
+                // Utiliser le nouveau dossier comme parent
+                parentId = newFolder.id;
+            }
+
             if (this.currentEditId) {
                 // D'abord on met à jour le titre et l'URL
                 await chrome.bookmarks.update(this.currentEditId, { title, url });
