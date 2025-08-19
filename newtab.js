@@ -24,7 +24,6 @@ class BookmarkManager {
     }
 
     setupEventListeners() {
-        // Recherche
         const searchInput = document.getElementById('searchInput');
         const clearSearchBtn = document.getElementById('clearSearchBtn');
         
@@ -37,7 +36,6 @@ class BookmarkManager {
             this.clearSearch();
         });
 
-        // Modal d'ajout de favori
         const addBtn = document.getElementById('addBookmarkBtn');
         const toggleAllBtn = document.getElementById('toggleAllBtn');
         const modal = document.getElementById('bookmarkModal');
@@ -109,13 +107,13 @@ class BookmarkManager {
     }
 
     renderBookmarkNodes(nodes, container, level = 0) {
-        // Séparer les favoris (liens) et les dossiers
+        // Séparer les favoris (liens) et les dossiers (a corriger si ça ne va pas)
         const bookmarks = [];
         const folders = [];
         
         nodes.forEach(node => {
             if (node.url) {
-                // C'est un favori (lien)
+                // C'est un favori
                 bookmarks.push(node);
             } else if (node.children) {
                 // C'est un dossier
@@ -239,6 +237,24 @@ class BookmarkManager {
             }
         });
 
+        // Clic molette pour ouvrir le lien dans un nouvel onglet en arrière-plan
+        bookmarkDiv.addEventListener('auxclick', (e) => {
+            if (e.button === 1 && !e.target.closest('.bookmark-actions')) { // Bouton molette
+                e.preventDefault();
+                chrome.tabs.create({
+                    url: bookmark.url,
+                    active: false // Ouvre en arrière-plan
+                });
+            }
+        });
+
+        // Support alternatif pour le clic molette avec mousedown
+        bookmarkDiv.addEventListener('mousedown', (e) => {
+            if (e.button === 1 && !e.target.closest('.bookmark-actions')) { // Bouton molette
+                e.preventDefault();
+            }
+        });
+
         // Actions buttons
         const editBtn = bookmarkDiv.querySelector('.edit-btn');
         const deleteBtn = bookmarkDiv.querySelector('.delete-btn');
@@ -347,7 +363,7 @@ class BookmarkManager {
         const traverseTree = (nodes, path = '') => {
             nodes.forEach(node => {
                 if (node.children) {
-                    if (node.title) { // pour ne pas avoir le dossier racine sans titre
+                    if (node.title) { // pour ne pas avoir le dossier racine sans titre sinon bug possible 
                         const fullPath = path ? `${path} > ${node.title}` : node.title;
                         folders.push({
                             id: node.id,
