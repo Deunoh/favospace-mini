@@ -3,6 +3,8 @@ class BookmarkManager {
         this.bookmarks = [];
         this.currentEditId = null;
         this.currentDeleteId = null;
+        this.currentDeleteFolderId = null;
+        this.currentDeleteFolderTitle = null;
         this.allFoldersExpanded = false;
         this.init();
     }
@@ -60,6 +62,18 @@ class BookmarkManager {
         deleteModal.addEventListener('click', (e) => {
             if (e.target === deleteModal) this.hideDeleteModal();
         });
+
+        // Modal de suppression de dossier
+        const deleteFolderModal = document.getElementById('deleteFolderModal');
+        const cancelDeleteFolderBtn = document.getElementById('cancelDeleteFolderBtn');
+        const confirmDeleteFolderBtn = document.getElementById('confirmDeleteFolderBtn');
+
+        cancelDeleteFolderBtn.addEventListener('click', () => this.hideDeleteFolderModal());
+        confirmDeleteFolderBtn.addEventListener('click', () => this.confirmDeleteFolder());
+        
+        deleteFolderModal.addEventListener('click', (e) => {
+            if (e.target === deleteFolderModal) this.hideDeleteFolderModal();
+        });
     }
 
     renderBookmarks(bookmarksToRender = null) {
@@ -116,15 +130,38 @@ class BookmarkManager {
                 <span class="folder-icon">📁</span>
                 <span class="folder-title">${this.escapeHtml(folder.title)}</span>
                 <span class="folder-count">${bookmarkCount}</span>
-                <span class="folder-toggle">▼</span>
+                <div class="folder-actions">
+                    <button class="action-btn delete-folder-btn" title="Supprimer le dossier">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 6h18"></path>
+                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                            <line x1="10" y1="11" x2="10" y2="17"></line>
+                            <line x1="14" y1="11" x2="14" y2="17"></line>
+                        </svg>
+                    </button>
+                    <span class="folder-toggle">▼</span>
+                </div>
             </div>
             <div class="folder-content"></div>
         `;
 
         // Toggle dossier
         const header = folderDiv.querySelector('.folder-header');
-        header.addEventListener('click', () => {
-            folderDiv.classList.toggle('collapsed');
+        const folderActions = folderDiv.querySelector('.folder-actions');
+        
+        header.addEventListener('click', (e) => {
+            // Ne pas toggle si on clique sur les actions
+            if (!e.target.closest('.folder-actions')) {
+                folderDiv.classList.toggle('collapsed');
+            }
+        });
+
+        // Action de suppression du dossier
+        const deleteFolderBtn = folderDiv.querySelector('.delete-folder-btn');
+        deleteFolderBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.showDeleteFolderModal(folder.id, folder.title);
         });
 
         return folderDiv;
@@ -147,7 +184,15 @@ class BookmarkManager {
             </div>
             <div class="bookmark-actions">
                 <button class="action-btn edit-btn" title="Modifier">✏️</button>
-                <button class="action-btn delete-btn" title="Supprimer">🗑️</button>
+                <button class="action-btn delete-btn" title="Supprimer">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 6h18"></path>
+                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                        <line x1="10" y1="11" x2="10" y2="17"></line>
+                        <line x1="14" y1="11" x2="14" y2="17"></line>
+                    </svg>
+                </button>
             </div>
         `;
 
@@ -357,6 +402,38 @@ class BookmarkManager {
         } catch (error) {
             console.error('Erreur lors de la suppression:', error);
             alert('Erreur lors de la suppression du favori');
+        }
+    }
+
+    showDeleteFolderModal(folderId, folderTitle) {
+        this.currentDeleteFolderId = folderId;
+        this.currentDeleteFolderTitle = folderTitle;
+        
+        const modal = document.getElementById('deleteFolderModal');
+        const folderNameSpan = document.getElementById('deleteFolderName');
+        folderNameSpan.textContent = folderTitle;
+        
+        modal.classList.add('show');
+    }
+
+    hideDeleteFolderModal() {
+        const modal = document.getElementById('deleteFolderModal');
+        modal.classList.remove('show');
+        this.currentDeleteFolderId = null;
+        this.currentDeleteFolderTitle = null;
+    }
+
+    async confirmDeleteFolder() {
+        if (!this.currentDeleteFolderId) return;
+
+        try {
+            await chrome.bookmarks.removeTree(this.currentDeleteFolderId);
+            this.hideDeleteFolderModal();
+            await this.loadBookmarks();
+            this.renderBookmarks();
+        } catch (error) {
+            console.error('Erreur lors de la suppression du dossier:', error);
+            alert('Erreur lors de la suppression du dossier');
         }
     }
 

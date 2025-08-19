@@ -239,6 +239,47 @@ body::before {
     font-weight: 600;
 }
 
+.folder-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.folder-actions .action-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    opacity: 0.6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+}
+
+.folder-actions .action-btn:hover {
+    background: rgba(0, 0, 0, 0.08);
+    opacity: 1;
+    transform: scale(1.05);
+}
+
+.folder-actions .delete-folder-btn:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--danger-color);
+}
+
+.folder-actions .delete-folder-btn svg {
+    transition: all 0.2s ease;
+}
+
+.folder-actions .delete-folder-btn:hover svg {
+    stroke: var(--danger-color);
+}
+
 .folder-toggle {
     font-size: 12px;
     color: var(--text-secondary);
@@ -357,6 +398,14 @@ body::before {
     transform: scale(1.1);
 }
 
+.delete-btn svg {
+    transition: all 0.2s ease;
+}
+
+.delete-btn:hover svg {
+    stroke: #ef5350;
+}
+
 /* Modal styles */
 .modal {
     display: none;
@@ -457,6 +506,17 @@ body::before {
 .no-bookmarks h3 {
     margin-bottom: 12px;
     color: var(--text-primary);
+}
+
+.warning-text {
+    color: var(--warning-color);
+    font-size: 14px;
+    margin: 16px 0;
+    padding: 12px;
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    border-radius: 8px;
+    border-left: 4px solid var(--warning-color);
 }
 
 /* Responsive design */

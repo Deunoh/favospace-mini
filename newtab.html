@@ -64,6 +64,19 @@
                 </div>
             </div>
         </div>
+
+        <!-- Modal de confirmation de suppression de dossier -->
+        <div id="deleteFolderModal" class="modal">
+            <div class="modal-content">
+                <h2>Confirmer la suppression du dossier</h2>
+                <p>Êtes-vous sûr de vouloir supprimer le dossier "<strong id="deleteFolderName"></strong>" et tout son contenu ?</p>
+                <p class="warning-text">⚠️ Cette action est irréversible et supprimera tous les favoris contenus dans ce dossier.</p>
+                <div class="form-actions">
+                    <button id="cancelDeleteFolderBtn" class="btn-secondary">Annuler</button>
+                    <button id="confirmDeleteFolderBtn" class="btn-danger">Supprimer le dossier</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="newtab.js"></script>
