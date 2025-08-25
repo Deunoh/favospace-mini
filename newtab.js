@@ -28,8 +28,15 @@ class BookmarkManager {
         const clearSearchBtn = document.getElementById('clearSearchBtn');
         
         searchInput.addEventListener('input', (e) => {
-            this.filterBookmarks(e.target.value);
-            this.updateClearSearchButton(e.target.value);
+            const searchValue = e.target.value;
+            
+            // Si c'est la première fois qu'on tape et que les dossiers ne sont pas déjà ouverts
+            if (searchValue.trim() && !this.allFoldersExpanded) {
+                this.toggleAllFolders();
+            }
+            
+            this.filterBookmarks(searchValue);
+            this.updateClearSearchButton(searchValue);
         });
 
         clearSearchBtn.addEventListener('click', () => {
