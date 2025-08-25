@@ -60,7 +60,7 @@ class BookmarkManager {
             if (e.target === modal) this.hideModal();
         });
 
-        // Formu favori
+        // Form favori
         form.addEventListener('submit', (e) => this.handleFormSubmit(e));
 
         // Bouton créer un nouveau dossier
