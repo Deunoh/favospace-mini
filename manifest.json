@@ -3,21 +3,14 @@
   "name": "Favospace bookmarks interface",
   "version": "1.0",
   "description": "Remplace la page nouvel onglet par une interface élégante pour gérer tes favoris !",
-  
-  "permissions": [
-    "bookmarks",
-    "storage",
-    "tabs"
-  ],
-  
+  "permissions": ["bookmarks"],
   "chrome_url_overrides": {
     "newtab": "newtab.html"
   },
   
-  "action": {
-    "default_title": "Gestionnaire de Favoris"
-  },
    "icons": {
-    "128": "logo-fs.png"
+    "16": "logo-fs16.png",  
+    "48": "logo-fs48.png",
+    "128": "logo-fs128.png"
   }
 }
