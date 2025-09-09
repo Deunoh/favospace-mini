@@ -8,13 +8,13 @@
     "newtab": "newtab.html"
   },
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "js/background.js"
   },
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["content.js"],
-      "css": ["popup-styles.css"]
+      "js": ["js/content.js"],
+      "css": ["css/popup-styles.css"]
     }
   ],
   "commands": {
