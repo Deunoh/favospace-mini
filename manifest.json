@@ -1,14 +1,32 @@
 {
   "manifest_version": 3,
   "name": "Favospace bookmarks interface",
-  "version": "1.0",
+  "version": "1.2",
   "description": "Remplace la page nouvel onglet par une interface élégante pour gérer tes favoris !",
-  "permissions": ["bookmarks"],
+  "permissions": ["bookmarks", "activeTab"],
   "chrome_url_overrides": {
     "newtab": "newtab.html"
   },
-  
-   "icons": {
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "css": ["popup-styles.css"]
+    }
+  ],
+  "commands": {
+    "open-bookmark-search": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+K",
+        "mac": "Command+Shift+K"
+      },
+      "description": "Ouvrir la recherche de favoris"
+    }
+  },
+  "icons": {
     "16": "logo-fs16.png",  
     "48": "logo-fs48.png",
     "128": "logo-fs128.png"
