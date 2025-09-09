@@ -171,7 +171,7 @@ class FavospacePopup {
         
         this.bookmarksList.innerHTML = '';
         
-        // Limiter à 50 résultats pour les performances
+        // Limiter à 50 résultats pour les performances, les agris..
         const limitedBookmarks = bookmarks.slice(0, 50);
         
         limitedBookmarks.forEach(bookmark => {
