@@ -213,6 +213,11 @@
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
+    z-index: 1000001 !important;
+    pointer-events: auto !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
 }
 
 .favospace-close-btn:hover {

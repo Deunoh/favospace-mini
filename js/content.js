@@ -108,7 +108,7 @@ class FavospacePopup {
                     <div class="favospace-bookmarks-list"></div>
                 </div>
                 <div class="favospace-footer">
-                    Utilisez Ctrl+Shift+K (⌘+Shift+K sur Mac) pour ouvrir cette recherche
+                    Utilisez Alt+Shift+Space pour ouvrir cette recherche
                 </div>
             </div>
         `;
@@ -129,7 +129,21 @@ class FavospacePopup {
             }
         });
         
-        closeBtn.addEventListener('click', () => {
+        closeBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this.close();
+        });
+        
+        // Double sécurité pour la croix de fermeture
+        closeBtn.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+        });
+        
+        closeBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
             this.close();
         });
         

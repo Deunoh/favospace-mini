@@ -20,8 +20,8 @@
   "commands": {
     "open-bookmark-search": {
       "suggested_key": {
-        "default": "Ctrl+Shift+Space",
-        "mac": "Command+Shift+Space"
+        "default": "Alt+Shift+Space",
+        "mac": "Alt+Shift+Space"
       },
       "description": "Ouvrir la recherche de favoris"
     }
