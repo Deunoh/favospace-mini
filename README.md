@@ -1,4 +1,4 @@
-# 🚀 Favospace - Interface élégante pour vos favoris
+# 🚀 Favospace Bookmarks - Interface élégante pour vos favoris
 
 <div align="center">
   <img src="logo-fs128.png" alt="Favospace Logo" width="128" height="128">
