@@ -108,7 +108,7 @@ class FavospacePopup {
                     <div class="favospace-bookmarks-list"></div>
                 </div>
                 <div class="favospace-footer">
-                    Utilisez Alt+Shift+F pour ouvrir cette recherche
+                    Échap ou clic extérieur pour fermer
                 </div>
             </div>
         `;
