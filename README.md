@@ -62,12 +62,12 @@ git clone https://github.com/Deunoh/favospace-mini.git
 
 ## 🛠️ Technologies utilisées
 
-- **HTML5/CSS3** avec animations et effets modernes
-- **JavaScript ES6+** pour la logique métier
-- **Chrome Extensions API** pour l'intégration navigateur
-- **Service Worker** pour les performances optimales
+- **HTML5/CSS3**
+- **JavaScript ES6+** 
 
 ## 🎨 Captures d'écran
+
+(Screenshots bientôt!)
 
 ### Interface principale
 ![Interface principale](screenshots/main-interface.png)
