@@ -16,7 +16,6 @@
 ### 🎨 Interface moderne
 - **Design élégant** avec arrière-plan animé et effets de verre
 - **Interface responsive** qui s'adapte à tous les écrans
-- **Thème sombre** avec des accents colorés
 
 ### 🔍 Recherche avancée
 - **Recherche instantanée** dans tous vos favoris
