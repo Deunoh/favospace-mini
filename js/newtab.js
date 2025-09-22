@@ -12,7 +12,28 @@ class BookmarkManager {
     async init() {
         await this.loadBookmarks();
         this.setupEventListeners();
+        this.setupDarkMode();
         this.renderBookmarks();
+    }
+
+    setupDarkMode() {
+        // charger le theme depuis le localStorage
+        const isDarkMode = localStorage.getItem('darkMode') === 'true';
+        if (isDarkMode) {
+            document.body.classList.add('dark-mode');
+        }
+
+        // l'event sur le bouton
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        darkModeToggle.addEventListener('click', () => {
+            this.toggleDarkMode();
+        });
+    }
+
+    toggleDarkMode() {
+        document.body.classList.toggle('dark-mode');
+        const isDarkMode = document.body.classList.contains('dark-mode');
+        localStorage.setItem('darkMode', isDarkMode.toString());
     }
 
     async loadBookmarks() {

@@ -15,6 +15,23 @@
     --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
+/* Variables mode sombre */
+body.dark-mode {
+    --background-color: #111827;
+    --surface-color: #1f2937;
+    --text-primary: #f9fafb;
+    --text-secondary: #9ca3af;
+    --border-color: #374151;
+}
+
+body.dark-mode {
+    background: 
+        radial-gradient(circle at 20% 20%, rgba(79, 70, 229, 0.2) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.2) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(59, 130, 246, 0.2) 0%, transparent 50%),
+        linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -82,12 +99,48 @@ body::before {
         inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
+.header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+}
+
+.dark-mode-toggle {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: rgba(255, 255, 255, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    min-height: 40px;
+    flex-shrink: 0;
+}
+
+.dark-mode-toggle:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.9);
+    transform: scale(1.05);
+}
+
+.dark-mode-toggle:active {
+    transform: scale(0.95);
+}
+
 .header h1 {
     font-size: 2rem;
     font-weight: 700;
     color: rgba(255, 255, 255, 0.95);
-    margin-bottom: 16px;
+    margin-bottom: 0;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    flex: 1;
 }
 .header h1 #mini-title {
     font-size: 1.2rem;
@@ -249,6 +302,16 @@ body::before {
     min-height: 500px;
 }
 
+body.dark-mode .main-content {
+    background: rgba(15, 23, 42, 0.6);
+    border-color: rgba(71, 85, 105, 0.3);
+}
+
+body.dark-mode .header {
+    background: rgba(15, 23, 42, 0.6);
+    border-color: rgba(71, 85, 105, 0.3);
+}
+
 .bookmarks-container {
     display: grid;
     gap: 16px;
@@ -259,6 +322,11 @@ body::before {
     border-radius: 12px;
     overflow: hidden;
     background: var(--surface-color);
+}
+
+body.dark-mode .folder {
+    background: #1f2937;
+    border-color: #4b5563;
 }
 
 .folder-header {
@@ -275,6 +343,14 @@ body::before {
     background: #f3f4f6;
 }
 
+body.dark-mode .folder-header {
+    background: #374151;
+}
+
+body.dark-mode .folder-header:hover {
+    background: #4b5563;
+}
+
 .folder-icon {
     font-size: 18px;
     color: var(--warning-color);
@@ -284,6 +360,10 @@ body::before {
     font-weight: 600;
     color: var(--text-primary);
     flex: 1;
+}
+
+body.dark-mode .folder-title {
+    color: rgba(255, 255, 255, 0.9);
 }
 
 .folder-count {
@@ -315,6 +395,11 @@ body::before {
     justify-content: center;
     width: 28px;
     height: 28px;
+    color: #374151;
+}
+
+body.dark-mode .folder-actions .action-btn {
+    color: rgba(255, 255, 255, 0.7);
 }
 
 .folder-actions .action-btn:hover {
@@ -323,9 +408,18 @@ body::before {
     transform: scale(1.05);
 }
 
+body.dark-mode .folder-actions .action-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
 .folder-actions .delete-folder-btn:hover {
     background: rgba(239, 68, 68, 0.1);
     color: var(--danger-color);
+}
+
+body.dark-mode .folder-actions .delete-folder-btn:hover {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ff6b6b;
 }
 
 .folder-actions .delete-folder-btn svg {
@@ -334,6 +428,14 @@ body::before {
 
 .folder-actions .delete-folder-btn:hover svg {
     stroke: var(--danger-color);
+}
+
+body.dark-mode .folder-actions .delete-folder-btn svg {
+    stroke: rgba(255, 255, 255, 0.7);
+}
+
+body.dark-mode .folder-actions .delete-folder-btn:hover svg {
+    stroke: #ff6b6b;
 }
 
 .folder-toggle {
@@ -369,9 +471,18 @@ body::before {
     min-height: 48px;
 }
 
+body.dark-mode .bookmark-item {
+    color: rgba(255, 255, 255, 0.9);
+}
+
 .bookmark-item:hover {
     background: #f9fafb;
     border-color: var(--border-color);
+}
+
+body.dark-mode .bookmark-item:hover {
+    background: #374151;
+    border-color: #4b5563;
 }
 
 .bookmark-favicon {
@@ -381,6 +492,10 @@ body::before {
     flex-shrink: 0;
     object-fit: cover;
     background: #f3f4f6;
+}
+
+body.dark-mode .bookmark-favicon {
+    background: #374151;
 }
 
 .bookmark-info {
@@ -449,8 +564,19 @@ body::before {
     color: #ef5350;
 }
 
+body.dark-mode .delete-btn {
+    background: rgba(239, 83, 80, 0.2);
+    border: 1px solid rgba(239, 83, 80, 0.3);
+    color: #ff6b6b;
+}
+
 .delete-btn:hover {
     background: rgba(198, 40, 40, 0.3);
+    transform: scale(1.1);
+}
+
+body.dark-mode .delete-btn:hover {
+    background: rgba(239, 83, 80, 0.3);
     transform: scale(1.1);
 }
 
@@ -460,6 +586,10 @@ body::before {
 
 .delete-btn:hover svg {
     stroke: #ef5350;
+}
+
+body.dark-mode .delete-btn:hover svg {
+    stroke: #ff6b6b;
 }
 
 /* Modal styles */
@@ -653,6 +783,17 @@ body::before {
         padding: 16px;
     }
     
+    .header-top {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    
+    .dark-mode-toggle {
+        align-self: flex-end;
+        margin-top: -40px;
+    }
+    
     .search-container {
         flex-direction: column;
     }
@@ -674,4 +815,25 @@ body::before {
     .form-actions {
         flex-direction: column;
     }
+}
+
+/* Animation pour le mode sombre */
+.dark-mode-toggle .sun-icon {
+    display: block;
+}
+
+.dark-mode-toggle .moon-icon {
+    display: none;
+}
+
+body.dark-mode .dark-mode-toggle .sun-icon {
+    display: none;
+}
+
+body.dark-mode .dark-mode-toggle .moon-icon {
+    display: block;
+}
+
+.dark-mode-toggle svg {
+    transition: opacity 0.3s ease, transform 0.3s ease;
 }
