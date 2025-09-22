@@ -783,15 +783,21 @@ body.dark-mode .delete-btn:hover svg {
         padding: 16px;
     }
     
+    .keyboard-shortcut-info {
+        display: none;
+    }
+    
     .header-top {
         flex-direction: column;
         align-items: flex-start;
         gap: 12px;
+        position: relative;
     }
     
     .dark-mode-toggle {
-        align-self: flex-end;
-        margin-top: -40px;
+        position: absolute;
+        top: 0;
+        right: 0;
     }
     
     .search-container {

@@ -6,7 +6,7 @@
   **Remplace la page nouvel onglet par une interface moderne et intuitive pour gérer vos favoris !**
   
   [![Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-Download-blue?style=for-the-badge&logo=googlechrome)](https://chromewebstore.google.com/detail/okndjjoacflpnollkahklpbfohdijgoa?utm_source=item-share-cb)
-  [![Version](https://img.shields.io/badge/Version-1.5-green?style=for-the-badge)]()
+  [![Version](https://img.shields.io/badge/Version-1.6-green?style=for-the-badge)]()
 </div>
 
 ---
