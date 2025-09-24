@@ -15,7 +15,7 @@
 ### 🎨 Interface moderne
 - **Design élégant** avec arrière-plan animé et effets de verre
 - **Interface responsive** qui s'adapte à tous les écrans
-- **Mode sombre et clair** à vous de choisir !
+- **Mode sombre et clair** : à vous de choisir !
 
 ### 🔍 Recherche avancée
 - **Recherche instantanée** dans tous vos favoris
@@ -25,7 +25,6 @@
 ### 📚 Gestion complète
 - **Visualisation** de tous vos favoris organisés
 - **Ajout/modification** de favoris directement depuis l'interface
-- **Ouverture multiple** de favoris en un clic
 - **Support des favicons** pour une identification rapide
 
 ## 🚀 Installation

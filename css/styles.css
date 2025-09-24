@@ -452,6 +452,7 @@ body.dark-mode .folder-actions .delete-folder-btn:hover svg {
     padding: 0 16px 16px 16px;
     display: grid;
     gap: 8px;
+    margin-top: 8px;
 }
 
 .folder.collapsed .folder-content {
