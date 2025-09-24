@@ -12,10 +12,10 @@
 ---
 
 ## ✨ Fonctionnalités
-
 ### 🎨 Interface moderne
 - **Design élégant** avec arrière-plan animé et effets de verre
 - **Interface responsive** qui s'adapte à tous les écrans
+- **Mode sombre et clair** à vous de choisir !
 
 ### 🔍 Recherche avancée
 - **Recherche instantanée** dans tous vos favoris
