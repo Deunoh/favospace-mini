@@ -231,9 +231,13 @@ class BookmarkManager {
         const faviconUrl = this.getFaviconUrl(bookmark.url);
         
         bookmarkDiv.innerHTML = `
-            <img class="bookmark-favicon" 
-                 src="${faviconUrl}" 
-                 alt="Favicon">
+            <div class="favicon-container" style="position: relative; width: 20px; height: 20px;">
+                <div class="favicon-loader"></div>
+                <img class="bookmark-favicon loading" 
+                     src="${faviconUrl}" 
+                     alt="Favicon"
+                     style="position: absolute; top: 0; left: 0;">
+            </div>
             <div class="bookmark-info">
                 <div class="bookmark-title">${this.escapeHtml(bookmark.title || bookmark.url)}</div>
                 <div class="bookmark-url">${this.escapeHtml(bookmark.url)}</div>
@@ -252,10 +256,18 @@ class BookmarkManager {
             </div>
         `;
 
-        // Gestion des erreurs de favicon
+        // Gestion du chargement et des erreurs de favicon
         const favicon = bookmarkDiv.querySelector('.bookmark-favicon');
+        const loader = bookmarkDiv.querySelector('.favicon-loader');
+        
+        favicon.addEventListener('load', () => {
+            loader.style.display = 'none';
+            favicon.classList.remove('loading');
+            favicon.classList.add('loaded');
+        });
+        
         favicon.addEventListener('error', () => {
-            this.handleFaviconError(favicon, bookmark.url);
+            this.handleFaviconError(favicon, bookmark.url, loader);
         });
 
         // Click pour ouvrir le lien
@@ -312,17 +324,27 @@ class BookmarkManager {
         }
     }
 
-    handleFaviconError(img, originalUrl) {
+    handleFaviconError(img, originalUrl, loader = null) {
         if (img.src.includes('google.com/s2/favicons')) {
             try {
                 const urlObj = new URL(originalUrl);
                 img.src = `${urlObj.protocol}//${urlObj.hostname}/favicon.ico`;
             } catch (error) {
                 img.src = this.getDefaultFavicon();
+                this.hideFaviconLoader(img, loader);
             }
         } else {
             img.src = this.getDefaultFavicon();
+            this.hideFaviconLoader(img, loader);
         }
+    }
+
+    hideFaviconLoader(img, loader) {
+        if (loader) {
+            loader.style.display = 'none';
+        }
+        img.classList.remove('loading');
+        img.classList.add('loaded');
     }
 
     getDefaultFavicon() {

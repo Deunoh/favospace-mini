@@ -844,3 +844,37 @@ body.dark-mode .dark-mode-toggle .moon-icon {
 .dark-mode-toggle svg {
     transition: opacity 0.3s ease, transform 0.3s ease;
 }
+
+/* Loader pour les favicons */
+.favicon-loader {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-top: 2px solid var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+body.dark-mode .favicon-loader {
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    border-top: 2px solid var(--primary-color);
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.bookmark-favicon {
+    transition: opacity 0.2s ease;
+}
+
+.bookmark-favicon.loading {
+    opacity: 0;
+}
+
+.bookmark-favicon.loaded {
+    opacity: 1;
+}
