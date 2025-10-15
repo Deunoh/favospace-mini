@@ -14,6 +14,7 @@ class BookmarkManager {
         this.setupEventListeners();
         this.setupDarkMode();
         this.renderBookmarks();
+        this.setupTipsRotation();
     }
 
     setupDarkMode() {
@@ -23,17 +24,103 @@ class BookmarkManager {
             document.body.classList.add('dark-mode');
         }
 
-        // l'event sur le bouton
+        // Boutons desktop
         const darkModeToggle = document.getElementById('darkModeToggle');
         darkModeToggle.addEventListener('click', () => {
             this.toggleDarkMode();
         });
 
-        // l'event sur le bouton gestionnaire de favoris
         const bookmarkManagerBtn = document.getElementById('bookmarkManagerBtn');
         bookmarkManagerBtn.addEventListener('click', () => {
             this.openBookmarkManager();
         });
+
+        const saveTabsBtn = document.getElementById('saveTabsBtn');
+        saveTabsBtn.addEventListener('click', () => {
+            this.saveTabs();
+        });
+
+        const restoreTabsBtn = document.getElementById('restoreTabsBtn');
+        restoreTabsBtn.addEventListener('click', () => {
+            this.restoreTabs();
+        });
+
+        // Boutons mobile
+        const darkModeToggleMobile = document.getElementById('darkModeToggleMobile');
+        darkModeToggleMobile.addEventListener('click', () => {
+            this.toggleDarkMode();
+            this.closeMobileMenu();
+        });
+
+        const bookmarkManagerBtnMobile = document.getElementById('bookmarkManagerBtnMobile');
+        bookmarkManagerBtnMobile.addEventListener('click', () => {
+            this.openBookmarkManager();
+            this.closeMobileMenu();
+        });
+
+        const saveTabsBtnMobile = document.getElementById('saveTabsBtnMobile');
+        saveTabsBtnMobile.addEventListener('click', () => {
+            this.saveTabs();
+            this.closeMobileMenu();
+        });
+
+        const restoreTabsBtnMobile = document.getElementById('restoreTabsBtnMobile');
+        restoreTabsBtnMobile.addEventListener('click', () => {
+            this.restoreTabs();
+            this.closeMobileMenu();
+        });
+
+        // Menu hamburger mobile
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        
+        mobileMenuBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            mobileMenu.classList.toggle('show');
+        });
+
+        // Fermer le menu en cliquant ailleurs
+        document.addEventListener('click', (e) => {
+            if (!mobileMenu.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
+                this.closeMobileMenu();
+            }
+        });
+
+        // Vérifier si des onglets sont sauvegardés au chargement
+        this.checkSavedTabs();
+    }
+
+    closeMobileMenu() {
+        const mobileMenu = document.getElementById('mobileMenu');
+        mobileMenu.classList.remove('show');
+    }
+
+    setupTipsRotation() {
+        const tipItems = document.querySelectorAll('.tip-item');
+        let currentTipIndex = 0;
+
+        // Ajouter l'event listener sur le lien du gestionnaire de favoris dans la deuxième astuce
+        const bookmarkManagerLinkTip = document.querySelector('.bookmark-manager-link-tip');
+        if (bookmarkManagerLinkTip) {
+            bookmarkManagerLinkTip.addEventListener('click', () => {
+                this.openBookmarkManager();
+            });
+        }
+
+        // Fonction pour changer d'astuce
+        const rotateTips = () => {
+            // Retirer la classe active de l'astuce actuelle
+            tipItems[currentTipIndex].classList.remove('active');
+            
+            // Passer à l'astuce suivante
+            currentTipIndex = (currentTipIndex + 1) % tipItems.length;
+            
+            // Ajouter la classe active à la nouvelle astuce
+            tipItems[currentTipIndex].classList.add('active');
+        };
+
+        // Changer d'astuce toutes les 5 secondes
+        setInterval(rotateTips, 5000);
     }
 
     toggleDarkMode() {
@@ -44,6 +131,128 @@ class BookmarkManager {
 
     openBookmarkManager() {
         chrome.tabs.create({ url: 'chrome://bookmarks/' });
+    }
+
+    async saveTabs() {
+        try {
+            // Récupérer l'onglet actuel
+            const [currentTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+            
+            // Récupérer tous les onglets ouverts
+            const tabs = await chrome.tabs.query({});
+            
+            // Filtrer pour ne garder que les onglets avec des URLs valides
+            // On exclut les onglets chrome:// et l'onglet actuel (newtab)
+            const tabsData = tabs
+                .filter(tab => {
+                    // Exclure l'onglet actuel si c'est le newtab
+                    if (tab.id === currentTab.id) return false;
+                    // Exclure les URLs système
+                    if (!tab.url || tab.url.startsWith('chrome://')) return false;
+                    // Garder le reste
+                    return true;
+                })
+                .map(tab => ({
+                    url: tab.url,
+                    title: tab.title,
+                    pinned: tab.pinned
+                }));
+
+            if (tabsData.length === 0) {
+                this.showNotification('Aucun onglet à sauvegarder', 'warning');
+                return;
+            }
+
+            // Sauvegarder dans le storage
+            await chrome.storage.local.set({ 
+                savedTabs: tabsData,
+                savedAt: new Date().toISOString()
+            });
+
+            this.showNotification(`${tabsData.length} onglet(s) sauvegardé(s) !`, 'success');
+            this.checkSavedTabs(); // Mettre à jour l'affichage du bouton restaurer
+        } catch (error) {
+            console.error('Erreur lors de la sauvegarde des onglets:', error);
+            this.showNotification('Erreur lors de la sauvegarde', 'error');
+        }
+    }
+
+    async restoreTabs() {
+        try {
+            const result = await chrome.storage.local.get(['savedTabs']);
+            
+            if (!result.savedTabs || result.savedTabs.length === 0) {
+                this.showNotification('Aucun onglet sauvegardé', 'warning');
+                return;
+            }
+
+            // Ouvrir tous les onglets sauvegardés
+            for (const tabData of result.savedTabs) {
+                await chrome.tabs.create({
+                    url: tabData.url,
+                    pinned: tabData.pinned,
+                    active: false
+                });
+            }
+
+            this.showNotification(`${result.savedTabs.length} onglet(s) restauré(s) !`, 'success');
+            
+            // Supprimer la sauvegarde après restauration
+            await chrome.storage.local.remove(['savedTabs', 'savedAt']);
+            
+            // Mettre à jour l'affichage des boutons
+            this.checkSavedTabs();
+        } catch (error) {
+            console.error('Erreur lors de la restauration des onglets:', error);
+            this.showNotification('Erreur lors de la restauration', 'error');
+        }
+    }
+
+    async checkSavedTabs() {
+        try {
+            const result = await chrome.storage.local.get(['savedTabs']);
+            const restoreBtn = document.getElementById('restoreTabsBtn');
+            const saveBtn = document.getElementById('saveTabsBtn');
+            const restoreBtnMobile = document.getElementById('restoreTabsBtnMobile');
+            const saveBtnMobile = document.getElementById('saveTabsBtnMobile');
+            
+            if (result.savedTabs && result.savedTabs.length > 0) {
+                // Desktop
+                restoreBtn.style.display = 'flex';
+                restoreBtn.title = `Restaurer ${result.savedTabs.length} onglet(s) sauvegardé(s)`;
+                saveBtn.title = `Remplacer la sauvegarde (${result.savedTabs.length} onglet(s))`;
+                
+                // Mobile
+                restoreBtnMobile.style.display = 'flex';
+            } else {
+                // Desktop
+                restoreBtn.style.display = 'none';
+                saveBtn.title = 'Sauvegarder les onglets ouverts';
+                
+                // Mobile
+                restoreBtnMobile.style.display = 'none';
+            }
+        } catch (error) {
+            console.error('Erreur lors de la vérification des onglets sauvegardés:', error);
+        }
+    }
+
+    showNotification(message, type = 'info') {
+        // Créer une notification visuelle
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        notification.textContent = message;
+        
+        document.body.appendChild(notification);
+        
+        // Animation d'apparition
+        setTimeout(() => notification.classList.add('show'), 10);
+        
+        // Retirer après 3 secondes
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
     }
 
     async loadBookmarks() {
@@ -134,9 +343,18 @@ class BookmarkManager {
             container.innerHTML = `
                 <div class="no-bookmarks">
                     <h3>Aucun favori trouvé</h3>
-                    <p>Commencez à ajouter des favoris pour les voir apparaître ici.</p>
+                    <p>Vous pouvez importer vos favoris depuis le <span class="bookmark-manager-link" id="bookmarkManagerLink">gestionnaire de favoris</span> de votre navigateur.</p>
                 </div>
             `;
+            
+            // Ajouter l'event listener sur le lien
+            const bookmarkManagerLink = document.getElementById('bookmarkManagerLink');
+            if (bookmarkManagerLink) {
+                bookmarkManagerLink.addEventListener('click', () => {
+                    this.openBookmarkManager();
+                });
+            }
+            
             return;
         }
 

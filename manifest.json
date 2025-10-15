@@ -1,9 +1,9 @@
 {
   "manifest_version": 3,
   "name": "Favospace bookmarks interface",
-  "version": "1.6.1",
+  "version": "1.7",
   "description": "Remplace la page nouvel onglet par une interface élégante pour gérer tes favoris !",
-  "permissions": ["bookmarks", "activeTab"],
+  "permissions": ["bookmarks", "activeTab", "tabs", "storage"],
   "chrome_url_overrides": {
     "newtab": "newtab.html"
   },
