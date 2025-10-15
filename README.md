@@ -6,7 +6,7 @@
   **Remplace la page nouvel onglet par une interface moderne et intuitive pour gérer vos favoris !**
   
   [![Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-Download-blue?style=for-the-badge&logo=googlechrome)](https://chromewebstore.google.com/detail/okndjjoacflpnollkahklpbfohdijgoa?utm_source=item-share-cb)
-  [![Version](https://img.shields.io/badge/Version-1.6-green?style=for-the-badge)]()
+  [![Version](https://img.shields.io/badge/Version-1.7-green?style=for-the-badge)]()
 </div>
 
 ---
@@ -20,12 +20,17 @@
 ### 🔍 Recherche avancée
 - **Recherche instantanée** dans tous vos favoris
 - **Popup de recherche rapide** accessible depuis n'importe quel site avec `Alt + Shift + F`
-- **Navigation au clavier** pour une utilisation ultra-rapide
 
 ### 📚 Gestion complète
 - **Visualisation** de tous vos favoris organisés
 - **Ajout/modification** de favoris directement depuis l'interface
 - **Support des favicons** pour une identification rapide
+- **Accès rapide au gestionnaire** : Bouton direct vers le gestionnaire natif de Chrome pour sauvegarder et importer vos favoris
+
+### 💾 Sauvegarde de sessions
+- **Sauvegarde des onglets** : Enregistrez tous vos onglets ouverts en un clic
+- **Restauration rapide** : Rouvrez facilement tous vos onglets sauvegardés
+- **Stockage local sécurisé** : Vos sessions restent sauvegardées même après fermeture du navigateur
 
 ## 🚀 Installation
 
