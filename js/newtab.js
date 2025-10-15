@@ -28,12 +28,22 @@ class BookmarkManager {
         darkModeToggle.addEventListener('click', () => {
             this.toggleDarkMode();
         });
+
+        // l'event sur le bouton gestionnaire de favoris
+        const bookmarkManagerBtn = document.getElementById('bookmarkManagerBtn');
+        bookmarkManagerBtn.addEventListener('click', () => {
+            this.openBookmarkManager();
+        });
     }
 
     toggleDarkMode() {
         document.body.classList.toggle('dark-mode');
         const isDarkMode = document.body.classList.contains('dark-mode');
         localStorage.setItem('darkMode', isDarkMode.toString());
+    }
+
+    openBookmarkManager() {
+        chrome.tabs.create({ url: 'chrome://bookmarks/' });
     }
 
     async loadBookmarks() {
