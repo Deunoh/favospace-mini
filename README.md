@@ -6,7 +6,7 @@
   **Remplace la page nouvel onglet par une interface moderne et intuitive pour gérer vos favoris !**
   
   [![Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-Download-blue?style=for-the-badge&logo=googlechrome)](https://chromewebstore.google.com/detail/okndjjoacflpnollkahklpbfohdijgoa?utm_source=item-share-cb)
-  [![Version](https://img.shields.io/badge/Version-1.7-green?style=for-the-badge)]()
+  [![Version](https://img.shields.io/badge/Version-2.0-green?style=for-the-badge)]()
 </div>
 
 ---
@@ -27,10 +27,12 @@
 - **Support des favicons** pour une identification rapide
 - **Accès rapide au gestionnaire** : Bouton direct vers le gestionnaire natif de Chrome pour sauvegarder et importer vos favoris
 
-### 💾 Sauvegarde de sessions
-- **Sauvegarde des onglets** : Enregistrez tous vos onglets ouverts en un clic
-- **Restauration rapide** : Rouvrez facilement tous vos onglets sauvegardés
-- **Stockage local sécurisé** : Vos sessions restent sauvegardées même après fermeture du navigateur
+### �️ Espaces de travail (Nouveau v2.0)
+- **Gestion d'espaces** : Créez et organisez vos espaces de travail (Travail, Perso, Projets, etc.)
+- **Popup dédiée** : Accédez à vos espaces via l'icône de l'extension dans la barre d'outils
+- **Sauvegarde des onglets** : Enregistrez tous vos onglets ouverts dans un espace nommé
+- **Restauration en un clic** : Rouvrez tous les onglets d'un espace instantanément
+- **Stockage local sécurisé** : Vos espaces restent sauvegardés même après fermeture du navigateur
 
 ## 🚀 Installation
 
@@ -63,10 +65,18 @@ git clone https://github.com/Deunoh/favospace-mini.git
   - `Entrée` pour ouvrir le premier résultat
   - `Échap` pour fermer
 
+### Espaces de travail
+- **Popup d'espaces** : Cliquez sur l'icône de l'extension dans la barre d'outils
+- **Création d'espaces** : Donnez un nom à votre espace et sauvegardez vos onglets actuels
+- **Gestion** : 
+  - Ouvrir un espace pour restaurer tous ses onglets
+  - Supprimer les espaces dont vous n'avez plus besoin
+  - Visualiser le nombre d'onglets et la date de création
+
 ## 🛠️ Technologies utilisées
 
 - **HTML5/CSS3**
-- **JavaScript ES6+** 
+- **JavaScript** 
 
 ## 🎨 Captures d'écran
 
@@ -79,6 +89,10 @@ git clone https://github.com/Deunoh/favospace-mini.git
 ### Popup de recherche
 ![Popup de recherche](screenshots/search-popup.png)
 *Recherche rapide accessible depuis n'importe quel site*
+
+### Gestion des espaces
+![Popup des espaces](screenshots/spaces-popup.png)
+*Organisez vos onglets en espaces de travail personnalisés*
 
 
 <div align="center">

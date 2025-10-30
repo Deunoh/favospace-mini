@@ -7,6 +7,7 @@ class FavospacePopup {
         this.searchInput = null;
         this.bookmarksList = null;
         this.allBookmarks = [];
+        this.searchDebounceTimer = null;
         
         // Écouter les messages du background script
         chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -148,8 +149,14 @@ class FavospacePopup {
         });
         
         this.searchInput.addEventListener('input', (e) => {
-            this.filterBookmarks(e.target.value);
-            this.updateClearButton(e.target.value);
+            const searchValue = e.target.value;
+            this.updateClearButton(searchValue);
+            
+            // Debounce la recherche pour améliorer les performances
+            clearTimeout(this.searchDebounceTimer);
+            this.searchDebounceTimer = setTimeout(() => {
+                this.filterBookmarks(searchValue);
+            }, 200);
         });
         
         clearBtn.addEventListener('click', () => {
@@ -210,7 +217,8 @@ class FavospacePopup {
         bookmarkDiv.innerHTML = `
             <img class="favospace-bookmark-favicon" 
                  src="${faviconUrl}" 
-                 alt="Favicon">
+                 alt="Favicon"
+                 loading="lazy">
             <div class="favospace-bookmark-info">
                 <div class="favospace-bookmark-title">${this.escapeHtml(bookmark.title || bookmark.url)}</div>
                 <div class="favospace-bookmark-url">${this.escapeHtml(bookmark.url)}</div>
@@ -226,6 +234,12 @@ class FavospacePopup {
         // Click pour ouvrir le lien
         bookmarkDiv.addEventListener('click', (e) => {
             e.preventDefault();
+            
+            // Vérifier que l'URL est sûre
+            if (!this.isUrlSafe(bookmark.url)) {
+                console.warn('URL bloquée pour des raisons de sécurité:', bookmark.url);
+                return;
+            }
             
             // Déterminer si on ouvre en arrière-plan ou au premier plan
             const active = !e.ctrlKey && !e.metaKey; // Ctrl/Cmd + clic = arrière-plan
@@ -246,6 +260,13 @@ class FavospacePopup {
         bookmarkDiv.addEventListener('auxclick', (e) => {
             if (e.button === 1) { // Clic molette
                 e.preventDefault();
+                
+                // Vérifier que l'URL est sûre
+                if (!this.isUrlSafe(bookmark.url)) {
+                    console.warn('URL bloquée pour des raisons de sécurité:', bookmark.url);
+                    return;
+                }
+                
                 chrome.runtime.sendMessage({
                     action: 'open-bookmark',
                     url: bookmark.url,
@@ -303,6 +324,17 @@ class FavospacePopup {
     
     getDefaultFavicon() {
         return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJMMTMuMDkgOC4yNkwyMCA5TDEzLjA5IDE1Ljc0TDEyIDIyTDEwLjkxIDE1Ljc0TDQgOUwxMC45MSA4LjI2TDEyIDJaIiBmaWxsPSIjOWNhM2FmIi8+Cjwvc3ZnPgo=';
+    }
+    
+    // Vérifier si une URL est sûre
+    isUrlSafe(url) {
+        if (!url) return false;
+        const lowerUrl = url.toLowerCase().trim();
+        // Bloquer les URLs dangereuses
+        return !lowerUrl.startsWith('javascript:') && 
+               !lowerUrl.startsWith('data:') && 
+               !lowerUrl.startsWith('file:') &&
+               !lowerUrl.startsWith('vbscript:');
     }
     
     escapeHtml(text) {

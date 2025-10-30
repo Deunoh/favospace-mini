@@ -6,28 +6,29 @@ class BookmarkManager {
         this.currentDeleteFolderId = null;
         this.currentDeleteFolderTitle = null;
         this.allFoldersExpanded = false;
+        this.searchDebounceTimer = null;
         this.init();
     }
 
     async init() {
         await this.loadBookmarks();
         this.setupEventListeners();
-        this.setupDarkMode();
+        await this.setupDarkMode();
         this.renderBookmarks();
         this.setupTipsRotation();
     }
 
-    setupDarkMode() {
-        // charger le theme depuis le localStorage
-        const isDarkMode = localStorage.getItem('darkMode') === 'true';
-        if (isDarkMode) {
+    async setupDarkMode() {
+        // charger le theme depuis chrome.storage.sync
+        const result = await chrome.storage.sync.get(['darkMode']);
+        if (result.darkMode) {
             document.body.classList.add('dark-mode');
         }
 
         // Boutons desktop
         const darkModeToggle = document.getElementById('darkModeToggle');
-        darkModeToggle.addEventListener('click', () => {
-            this.toggleDarkMode();
+        darkModeToggle.addEventListener('click', async () => {
+            await this.toggleDarkMode();
         });
 
         const bookmarkManagerBtn = document.getElementById('bookmarkManagerBtn');
@@ -47,8 +48,8 @@ class BookmarkManager {
 
         // Boutons mobile
         const darkModeToggleMobile = document.getElementById('darkModeToggleMobile');
-        darkModeToggleMobile.addEventListener('click', () => {
-            this.toggleDarkMode();
+        darkModeToggleMobile.addEventListener('click', async () => {
+            await this.toggleDarkMode();
             this.closeMobileMenu();
         });
 
@@ -123,10 +124,10 @@ class BookmarkManager {
         setInterval(rotateTips, 5000);
     }
 
-    toggleDarkMode() {
+    async toggleDarkMode() {
         document.body.classList.toggle('dark-mode');
         const isDarkMode = document.body.classList.contains('dark-mode');
-        localStorage.setItem('darkMode', isDarkMode.toString());
+        await chrome.storage.sync.set({ darkMode: isDarkMode });
     }
 
     openBookmarkManager() {
@@ -269,14 +270,18 @@ class BookmarkManager {
         
         searchInput.addEventListener('input', (e) => {
             const searchValue = e.target.value;
-            
-            // Si c'est la première fois qu'on tape et que les dossiers ne sont pas déjà ouverts
-            if (searchValue.trim() && !this.allFoldersExpanded) {
-                this.toggleAllFolders();
-            }
-            
-            this.filterBookmarks(searchValue);
             this.updateClearSearchButton(searchValue);
+            
+            // Debounce la recherche pour améliorer les performances
+            clearTimeout(this.searchDebounceTimer);
+            this.searchDebounceTimer = setTimeout(() => {
+                // Si c'est la première fois qu'on tape et que les dossiers ne sont pas déjà ouverts
+                if (searchValue.trim() && !this.allFoldersExpanded) {
+                    this.toggleAllFolders();
+                }
+                
+                this.filterBookmarks(searchValue);
+            }, 200);
         });
 
         clearSearchBtn.addEventListener('click', () => {
@@ -464,6 +469,7 @@ class BookmarkManager {
                 <img class="bookmark-favicon loading" 
                      src="${faviconUrl}" 
                      alt="Favicon"
+                     loading="lazy"
                      style="position: absolute; top: 0; left: 0;">
             </div>
             <div class="bookmark-info">
@@ -501,7 +507,10 @@ class BookmarkManager {
         // Click pour ouvrir le lien
         bookmarkDiv.addEventListener('click', (e) => {
             if (!e.target.closest('.bookmark-actions')) {
-                window.open(bookmark.url, '_blank');
+                // Vérifier que l'URL est sûre avant d'ouvrir
+                if (this.isUrlSafe(bookmark.url)) {
+                    window.open(bookmark.url, '_blank');
+                }
             }
         });
 
@@ -509,10 +518,14 @@ class BookmarkManager {
         bookmarkDiv.addEventListener('auxclick', (e) => {
             if (e.button === 1 && !e.target.closest('.bookmark-actions')) { // Bouton molette
                 e.preventDefault();
-                chrome.tabs.create({
-                    url: bookmark.url,
-                    active: false // Ouvre en arrière-plan
-                });
+                
+                // Vérifier que l'URL est sûre avant d'ouvrir
+                if (this.isUrlSafe(bookmark.url)) {
+                    chrome.tabs.create({
+                        url: bookmark.url,
+                        active: false // Ouvre en arrière-plan
+                    });
+                }
             }
         });
 
@@ -884,6 +897,17 @@ class BookmarkManager {
             "'": '&#039;'
         };
         return text.replace(/[&<>"']/g, (m) => map[m]);
+    }
+
+    // Vérifier si une URL est sûre
+    isUrlSafe(url) {
+        if (!url) return false;
+        const lowerUrl = url.toLowerCase().trim();
+        // Bloquer les URLs dangereuses
+        return !lowerUrl.startsWith('javascript:') && 
+               !lowerUrl.startsWith('data:') && 
+               !lowerUrl.startsWith('file:') &&
+               !lowerUrl.startsWith('vbscript:');
     }
 
     toggleAllFolders() {

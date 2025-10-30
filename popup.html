@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Favospace - Espaces</title>
+    <link rel="stylesheet" href="css/popup.css">
+</head>
+<body>
+    <div class="popup-container">
+        <header>
+            <h1>Mes Espaces</h1>
+        </header>
+
+        <!-- Section: Créer un nouvel espace -->
+        <section class="create-space">
+            <input 
+                type="text" 
+                id="space-name" 
+                placeholder="Nom de l'espace (ex: Travail, Perso...)"
+                maxlength="30"
+            >
+            <button id="save-space-btn" class="btn-primary">
+                Sauvegarder les onglets actuels
+            </button>
+        </section>
+
+        <!-- Section: Liste des espaces -->
+        <section class="spaces-list">
+            <div id="spaces-container">
+                <!-- Les espaces seront ajoutés ici dynamiquement -->
+            </div>
+        </section>
+
+        <footer>
+            <div class="info">
+                <span id="tabs-count">0 onglets ouverts</span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Modal de confirmation de suppression -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <h2>Confirmer la suppression</h2>
+            <p id="deleteModalText">Êtes-vous sûr de vouloir supprimer cet espace ?</p>
+            <div class="modal-actions">
+                <button id="cancelDeleteBtn" class="btn-secondary">Annuler</button>
+                <button id="confirmDeleteBtn" class="btn-danger">Supprimer</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/popup.js"></script>
+</body>
+</html>
