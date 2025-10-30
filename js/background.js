@@ -4,7 +4,12 @@ chrome.commands.onCommand.addListener((command) => {
         // get onglet actif
         chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
             if (tabs[0]) {
-                chrome.tabs.sendMessage(tabs[0].id, {action: 'toggle-bookmark-search'});
+                chrome.tabs.sendMessage(tabs[0].id, {action: 'toggle-bookmark-search'}, (response) => {
+                    if (chrome.runtime.lastError) {
+                        // Content script non disponible (pages chrome://, extensions, etc.)
+                        console.log('Content script non disponible sur cette page:', chrome.runtime.lastError.message);
+                    }
+                });
             }
         });
     }
