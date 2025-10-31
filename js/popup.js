@@ -90,11 +90,7 @@ class WorkspaceManager {
             
             // Filtrer et formater les onglets
             const tabsData = tabs
-                .filter(tab => 
-                    !tab.url.startsWith('chrome://') && 
-                    !tab.url.startsWith('chrome-extension://') &&
-                    this.isUrlSafe(tab.url)
-                )
+                .filter(tab => this.isValidTab(tab) && this.isUrlSafe(tab.url))
                 .map(tab => ({
                     url: tab.url,
                     title: tab.title,
@@ -265,10 +261,7 @@ class WorkspaceManager {
     // Mettre à jour le compteur d'onglets
     async updateTabsCount() {
         const tabs = await chrome.tabs.query({ currentWindow: true });
-        const validTabs = tabs.filter(tab => 
-            !tab.url.startsWith('chrome://') && 
-            !tab.url.startsWith('chrome-extension://')
-        );
+        const validTabs = tabs.filter(tab => this.isValidTab(tab));
         document.getElementById('tabs-count').textContent = 
             `${validTabs.length} onglet${validTabs.length > 1 ? 's' : ''} ouvert${validTabs.length > 1 ? 's' : ''}`;
     }
@@ -290,11 +283,40 @@ class WorkspaceManager {
     }
 
     // Échapper le HTML pour éviter les XSS
-    // Échapper le HTML pour éviter les XSS
     escapeHtml(text) {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    }
+
+    // Vérifier si un onglet est valide (pas une page système)
+    isValidTab(tab) {
+        if (!tab || !tab.url) return false;
+        const url = tab.url.toLowerCase();
+        
+        // Filtrer toutes les pages système des navigateurs Chromium
+        // Voir plus tard si je peux faire en sorte de rendre ça plus générique  
+        const systemProtocols = [
+            'chrome://',
+            'chrome-extension://',
+            'edge://',
+            'about:',
+            'chrome-search://',
+            'devtools://',
+            'view-source:',
+            'chrome-error://',
+            'brave://',
+            'opera://',
+            'vivaldi://'
+        ];
+        
+        // Vérifier si l'URL commence par un protocole système
+        const isSystemPage = systemProtocols.some(protocol => url.startsWith(protocol));
+        
+        // Vérifier aussi que c'est une URL web valide (http/https) ou une extension valide
+        const isValidUrl = url.startsWith('http://') || url.startsWith('https://') || url.startsWith('file://');
+        
+        return !isSystemPage && isValidUrl;
     }
 
     // Vérifier si une URL est sûre
