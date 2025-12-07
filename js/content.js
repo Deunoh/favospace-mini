@@ -303,14 +303,19 @@ class FavospacePopup {
         try {
             const urlObj = new URL(url);
             const domain = urlObj.hostname;
-            return `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
+            // Ancienne API Google
+            // return `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
+            
+            // Nouvelle API Vemetric
+            return `https://favicon.vemetric.com/${domain}?size=128`;
         } catch (error) {
             return this.getDefaultFavicon();
         }
     }
     
     handleFaviconError(img, originalUrl) {
-        if (img.src.includes('google.com/s2/favicons')) {
+        // if (img.src.includes('google.com/s2/favicons')) {
+        if (img.src.includes('favicon.vemetric.com')) {
             try {
                 const urlObj = new URL(originalUrl);
                 img.src = `${urlObj.protocol}//${urlObj.hostname}/favicon.ico`;
@@ -323,7 +328,8 @@ class FavospacePopup {
     }
     
     getDefaultFavicon() {
-        return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJMMTMuMDkgOC4yNkwyMCA5TDEzLjA5IDE1Ljc0TDEyIDIyTDEwLjkxIDE1Ljc0TDQgOUwxMC45MSA4LjI2TDEyIDJaIiBmaWxsPSIjOWNhM2FmIi8+Cjwvc3ZnPgo=';
+        // Utiliser le logo Favospace comme fallback (si API down ou URL invalide)
+        return chrome.runtime.getURL('logo-fs128.png');
     }
     
     // Vérifier si une URL est sûre
