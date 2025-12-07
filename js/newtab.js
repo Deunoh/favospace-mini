@@ -464,13 +464,13 @@ class BookmarkManager {
         const faviconUrl = this.getFaviconUrl(bookmark.url);
         
         bookmarkDiv.innerHTML = `
-            <div class="favicon-container" style="position: relative; width: 20px; height: 20px;">
+            <div class="favicon-container" style="position: relative; width: 32px; height: 32px;">
                 <div class="favicon-loader"></div>
                 <img class="bookmark-favicon loading" 
                      src="${faviconUrl}" 
                      alt="Favicon"
                      loading="lazy"
-                     style="position: absolute; top: 0; left: 0;">
+                     style="position: absolute; top: 0; left: 0; width: 32px; height: 32px;">
             </div>
             <div class="bookmark-info">
                 <div class="bookmark-title">${this.escapeHtml(bookmark.title || bookmark.url)}</div>
@@ -557,8 +557,11 @@ class BookmarkManager {
         try {
             const urlObj = new URL(url);
             const domain = urlObj.hostname;
-            // api google à voir avec favicon extractor ou google chrome
-            return `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
+            // Ancienne API Google
+            // return `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
+            
+            // Nouvelle API Vemetric
+            return `https://favicon.vemetric.com/${domain}?size=128`;
         } catch (error) {
             // Si l'URL n'est pas valide, retourner un favicon par défaut
             return this.getDefaultFavicon();
@@ -566,7 +569,8 @@ class BookmarkManager {
     }
 
     handleFaviconError(img, originalUrl, loader = null) {
-        if (img.src.includes('google.com/s2/favicons')) {
+        // if (img.src.includes('google.com/s2/favicons')) {
+        if (img.src.includes('favicon.vemetric.com')) {
             try {
                 const urlObj = new URL(originalUrl);
                 img.src = `${urlObj.protocol}//${urlObj.hostname}/favicon.ico`;
@@ -589,8 +593,8 @@ class BookmarkManager {
     }
 
     getDefaultFavicon() {
-        // SVG en base64 créer par ia pour le défaut, à changer pour plus tard
-        return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjIwIiBoZWlnaHQ9IjIwIiByeD0iNCIgZmlsbD0iIzRmNDZlNSIvPgo8cGF0aCBkPSJNMTAgNkM4Ljg5NTQzIDYgOCA2Ljg5NTQzIDggOFYxMkM4IDEzLjEwNDYgOC44OTU0MyAxNCAxMCAxNEMxMS4xMDQ2IDE0IDEyIDEzLjEwNDYgMTIgMTJWOEMxMiA2Ljg5NTQzIDExLjEwNDYgNiAxMCA2WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+';
+        // Utiliser le logo Favospace comme fallback (si API down ou URL invalide)
+        return chrome.runtime.getURL('logo-fs128.png');
     }
 
     countBookmarks(folder) {
