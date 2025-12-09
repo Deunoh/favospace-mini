@@ -16,6 +16,7 @@ class BookmarkManager {
         await this.setupDarkMode();
         this.renderBookmarks();
         this.setupTipsRotation();
+        this.setupScrollToTop();
     }
 
     async setupDarkMode() {
@@ -122,6 +123,27 @@ class BookmarkManager {
 
         // Changer d'astuce toutes les 5 secondes
         setInterval(rotateTips, 5000);
+    }
+
+    setupScrollToTop() {
+        const scrollToTopBtn = document.getElementById('scrollToTopBtn');
+        
+        // Afficher/masquer le bouton selon la position du scroll
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                scrollToTopBtn.classList.add('visible');
+            } else {
+                scrollToTopBtn.classList.remove('visible');
+            }
+        });
+
+        // Remonter en haut au clic
+        scrollToTopBtn.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
     }
 
     async toggleDarkMode() {
