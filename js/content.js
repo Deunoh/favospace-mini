@@ -212,7 +212,7 @@ class FavospacePopup {
         const bookmarkDiv = document.createElement('div');
         bookmarkDiv.className = 'favospace-bookmark-item';
         
-        const faviconUrl = this.getFaviconUrl(bookmark.url);
+        const faviconUrl = getFaviconUrl(bookmark.url);
         
         bookmarkDiv.innerHTML = `
             <img class="favospace-bookmark-favicon" 
@@ -220,15 +220,15 @@ class FavospacePopup {
                  alt="Favicon"
                  loading="lazy">
             <div class="favospace-bookmark-info">
-                <div class="favospace-bookmark-title">${this.escapeHtml(bookmark.title || bookmark.url)}</div>
-                <div class="favospace-bookmark-url">${this.escapeHtml(bookmark.url)}</div>
+                <div class="favospace-bookmark-title">${escapeHtml(bookmark.title || bookmark.url)}</div>
+                <div class="favospace-bookmark-url">${escapeHtml(bookmark.url)}</div>
             </div>
         `;
         
         // Gestion des erreurs de favicon
         const favicon = bookmarkDiv.querySelector('.favospace-bookmark-favicon');
         favicon.addEventListener('error', () => {
-            this.handleFaviconError(favicon, bookmark.url);
+            handleFaviconError(favicon, bookmark.url);
         });
         
         // Click pour ouvrir le lien
@@ -236,7 +236,7 @@ class FavospacePopup {
             e.preventDefault();
             
             // Vérifier que l'URL est sûre
-            if (!this.isUrlSafe(bookmark.url)) {
+            if (!isUrlSafe(bookmark.url)) {
                 console.warn('URL bloquée pour des raisons de sécurité:', bookmark.url);
                 return;
             }
@@ -262,7 +262,7 @@ class FavospacePopup {
                 e.preventDefault();
                 
                 // Vérifier que l'URL est sûre
-                if (!this.isUrlSafe(bookmark.url)) {
+                if (!isUrlSafe(bookmark.url)) {
                     console.warn('URL bloquée pour des raisons de sécurité:', bookmark.url);
                     return;
                 }
@@ -297,61 +297,6 @@ class FavospacePopup {
         if (clearBtn) {
             clearBtn.style.display = searchValue.trim() ? 'flex' : 'none';
         }
-    }
-    
-    getFaviconUrl(url) {
-        try {
-            const urlObj = new URL(url);
-            const domain = urlObj.hostname;
-            // Ancienne API Google
-            // return `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
-            
-            // Nouvelle API Vemetric
-            return `https://favicon.vemetric.com/${domain}?size=128`;
-        } catch (error) {
-            return this.getDefaultFavicon();
-        }
-    }
-    
-    handleFaviconError(img, originalUrl) {
-        // if (img.src.includes('google.com/s2/favicons')) {
-        if (img.src.includes('favicon.vemetric.com')) {
-            try {
-                const urlObj = new URL(originalUrl);
-                img.src = `${urlObj.protocol}//${urlObj.hostname}/favicon.ico`;
-            } catch (error) {
-                img.src = this.getDefaultFavicon();
-            }
-        } else {
-            img.src = this.getDefaultFavicon();
-        }
-    }
-    
-    getDefaultFavicon() {
-        // Utiliser le logo Favospace comme fallback (si API down ou URL invalide)
-        return chrome.runtime.getURL('logo-fs128.png');
-    }
-    
-    // Vérifier si une URL est sûre
-    isUrlSafe(url) {
-        if (!url) return false;
-        const lowerUrl = url.toLowerCase().trim();
-        // Bloquer les URLs dangereuses
-        return !lowerUrl.startsWith('javascript:') && 
-               !lowerUrl.startsWith('data:') && 
-               !lowerUrl.startsWith('file:') &&
-               !lowerUrl.startsWith('vbscript:');
-    }
-    
-    escapeHtml(text) {
-        const map = {
-            '&': '&amp;',
-            '<': '&lt;',
-            '>': '&gt;',
-            '"': '&quot;',
-            "'": '&#039;'
-        };
-        return text.replace(/[&<>"']/g, (m) => map[m]);
     }
 }
 

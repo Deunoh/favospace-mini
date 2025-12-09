@@ -417,7 +417,7 @@ class BookmarkManager {
         folderDiv.innerHTML = `
             <div class="folder-header">
                 <span class="folder-icon">📁</span>
-                <span class="folder-title">${this.escapeHtml(folder.title)}</span>
+                <span class="folder-title">${escapeHtml(folder.title)}</span>
                 <span class="folder-count">${bookmarkCount}</span>
                 <div class="folder-actions">
                     <button class="action-btn delete-folder-btn" title="Supprimer le dossier">
@@ -461,7 +461,7 @@ class BookmarkManager {
         bookmarkDiv.className = 'bookmark-item';
         
         // Extraire le domaine pour le favicon
-        const faviconUrl = this.getFaviconUrl(bookmark.url);
+        const faviconUrl = getFaviconUrl(bookmark.url);
         
         bookmarkDiv.innerHTML = `
             <div class="favicon-container" style="position: relative; width: 32px; height: 32px;">
@@ -473,8 +473,8 @@ class BookmarkManager {
                      style="position: absolute; top: 0; left: 0; width: 32px; height: 32px;">
             </div>
             <div class="bookmark-info">
-                <div class="bookmark-title">${this.escapeHtml(bookmark.title || bookmark.url)}</div>
-                <div class="bookmark-url">${this.escapeHtml(bookmark.url)}</div>
+                <div class="bookmark-title">${escapeHtml(bookmark.title || bookmark.url)}</div>
+                <div class="bookmark-url">${escapeHtml(bookmark.url)}</div>
             </div>
             <div class="bookmark-actions">
                 <button class="action-btn edit-btn" title="Modifier">✏️</button>
@@ -501,14 +501,14 @@ class BookmarkManager {
         });
         
         favicon.addEventListener('error', () => {
-            this.handleFaviconError(favicon, bookmark.url, loader);
+            handleFaviconError(favicon, bookmark.url, loader);
         });
 
         // Click pour ouvrir le lien
         bookmarkDiv.addEventListener('click', (e) => {
             if (!e.target.closest('.bookmark-actions')) {
                 // Vérifier que l'URL est sûre avant d'ouvrir
-                if (this.isUrlSafe(bookmark.url)) {
+                if (isUrlSafe(bookmark.url)) {
                     window.open(bookmark.url, '_blank');
                 }
             }
@@ -520,7 +520,7 @@ class BookmarkManager {
                 e.preventDefault();
                 
                 // Vérifier que l'URL est sûre avant d'ouvrir
-                if (this.isUrlSafe(bookmark.url)) {
+                if (isUrlSafe(bookmark.url)) {
                     chrome.tabs.create({
                         url: bookmark.url,
                         active: false // Ouvre en arrière-plan
@@ -551,50 +551,6 @@ class BookmarkManager {
         });
 
         return bookmarkDiv;
-    }
-
-    getFaviconUrl(url) {
-        try {
-            const urlObj = new URL(url);
-            const domain = urlObj.hostname;
-            // Ancienne API Google
-            // return `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
-            
-            // Nouvelle API Vemetric
-            return `https://favicon.vemetric.com/${domain}?size=128`;
-        } catch (error) {
-            // Si l'URL n'est pas valide, retourner un favicon par défaut
-            return this.getDefaultFavicon();
-        }
-    }
-
-    handleFaviconError(img, originalUrl, loader = null) {
-        // if (img.src.includes('google.com/s2/favicons')) {
-        if (img.src.includes('favicon.vemetric.com')) {
-            try {
-                const urlObj = new URL(originalUrl);
-                img.src = `${urlObj.protocol}//${urlObj.hostname}/favicon.ico`;
-            } catch (error) {
-                img.src = this.getDefaultFavicon();
-                this.hideFaviconLoader(img, loader);
-            }
-        } else {
-            img.src = this.getDefaultFavicon();
-            this.hideFaviconLoader(img, loader);
-        }
-    }
-
-    hideFaviconLoader(img, loader) {
-        if (loader) {
-            loader.style.display = 'none';
-        }
-        img.classList.remove('loading');
-        img.classList.add('loaded');
-    }
-
-    getDefaultFavicon() {
-        // Utiliser le logo Favospace comme fallback (si API down ou URL invalide)
-        return chrome.runtime.getURL('logo-fs128.png');
     }
 
     countBookmarks(folder) {
@@ -679,7 +635,7 @@ class BookmarkManager {
     hideModal() {
         const modal = document.getElementById('bookmarkModal');
         modal.classList.remove('show');
-        // Réinitialiser le formulaire de création de dossier
+        // Réinit le form de création de dossier
         this.hideCreateFolderForm();
     }
 
@@ -890,28 +846,6 @@ class BookmarkManager {
         });
 
         return results;
-    }
-
-    escapeHtml(text) {
-        const map = {
-            '&': '&amp;',
-            '<': '&lt;',
-            '>': '&gt;',
-            '"': '&quot;',
-            "'": '&#039;'
-        };
-        return text.replace(/[&<>"']/g, (m) => map[m]);
-    }
-
-    // Vérifier si une URL est sûre
-    isUrlSafe(url) {
-        if (!url) return false;
-        const lowerUrl = url.toLowerCase().trim();
-        // Bloquer les URLs dangereuses
-        return !lowerUrl.startsWith('javascript:') && 
-               !lowerUrl.startsWith('data:') && 
-               !lowerUrl.startsWith('file:') &&
-               !lowerUrl.startsWith('vbscript:');
     }
 
     toggleAllFolders() {
