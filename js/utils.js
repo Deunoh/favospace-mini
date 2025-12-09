@@ -1,4 +1,5 @@
 // Fonctions utilitaires partagées entre newtab.js et content.js
+// Fichier creer car beaucoup de code répété entre les deux fichiers (gestion des favicons principalement)
 
 /**
  * Récupère l'URL du favicon pour un site donné
