@@ -8,7 +8,8 @@ class FavospacePopup {
         this.bookmarksList = null;
         this.allBookmarks = [];
         this.searchDebounceTimer = null;
-        
+        this.activeIndex = -1;
+
         // Écouter les messages du background script
         chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             if (request.action === 'toggle-bookmark-search') {
@@ -166,20 +167,43 @@ class FavospacePopup {
             this.searchInput.focus();
         });
         
-        // Gérer Enter pour ouvrir le premier résultat
+        // Navigation clavier : flèches pour se déplacer, Entrée pour ouvrir la sélection
         this.searchInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                const firstBookmark = this.bookmarksList.querySelector('.favospace-bookmark-item');
-                if (firstBookmark) {
-                    firstBookmark.click();
+            const items = this.bookmarksList.querySelectorAll('.favospace-bookmark-item');
+            if (items.length === 0) return;
+
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                this.activeIndex = (this.activeIndex + 1) % items.length;
+                this.updateActiveItem(items);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                this.activeIndex = (this.activeIndex - 1 + items.length) % items.length;
+                this.updateActiveItem(items);
+            } else if (e.key === 'Enter') {
+                const target = items[this.activeIndex] || items[0];
+                if (target) {
+                    target.click();
                 }
             }
         });
     }
     
+    updateActiveItem(items) {
+        items.forEach((item, index) => {
+            if (index === this.activeIndex) {
+                item.classList.add('favospace-active');
+                item.scrollIntoView({ block: 'nearest' });
+            } else {
+                item.classList.remove('favospace-active');
+            }
+        });
+    }
+
     renderBookmarks(bookmarksToRender = null) {
         const bookmarks = bookmarksToRender || this.allBookmarks;
-        
+        this.activeIndex = bookmarks && bookmarks.length > 0 ? 0 : -1;
+
         if (!bookmarks || bookmarks.length === 0) {
             this.bookmarksList.innerHTML = `
                 <div class="favospace-no-results">
@@ -199,13 +223,15 @@ class FavospacePopup {
             const bookmarkElement = this.createBookmarkElement(bookmark);
             this.bookmarksList.appendChild(bookmarkElement);
         });
-        
+
         if (bookmarks.length > 50) {
             const moreElement = document.createElement('div');
             moreElement.className = 'favospace-no-results';
             moreElement.innerHTML = `<p>Et ${bookmarks.length - 50} autres résultats...</p>`;
             this.bookmarksList.appendChild(moreElement);
         }
+
+        this.updateActiveItem(this.bookmarksList.querySelectorAll('.favospace-bookmark-item'));
     }
     
     createBookmarkElement(bookmark) {
@@ -230,7 +256,14 @@ class FavospacePopup {
         favicon.addEventListener('error', () => {
             handleFaviconError(favicon, bookmark.url);
         });
-        
+
+        // Survol souris : synchronise la sélection clavier avec l'élément survolé
+        bookmarkDiv.addEventListener('mouseenter', () => {
+            const items = Array.from(this.bookmarksList.querySelectorAll('.favospace-bookmark-item'));
+            this.activeIndex = items.indexOf(bookmarkDiv);
+            this.updateActiveItem(items);
+        });
+
         // Click pour ouvrir le lien
         bookmarkDiv.addEventListener('click', (e) => {
             e.preventDefault();
@@ -300,7 +333,11 @@ class FavospacePopup {
     }
 }
 
-// Initialiser la popup seulement si on n'est pas sur une page d'extension
-if (!window.location.href.startsWith('chrome-extension://')) {
+// Initialiser la popup seulement si on n'est pas sur une page d'extension.
+// Le script est maintenant injecté à la demande (voir background.js) plutôt que statiquement
+// via le manifest : on se protège contre une double injection si le raccourci est pressé
+// plusieurs fois avant que le tout premier "toggle" n'ait pu être délivré.
+if (!window.location.href.startsWith('chrome-extension://') && !window.__favospacePopupInjected) {
+    window.__favospacePopupInjected = true;
     new FavospacePopup();
 }

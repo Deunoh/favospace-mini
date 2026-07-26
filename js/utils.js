@@ -2,19 +2,22 @@
 // Fichier creer car beaucoup de code répété entre les deux fichiers (gestion des favicons principalement)
 
 /**
- * Récupère l'URL du favicon pour un site donné
+ * Récupère l'URL du favicon pour un site donné, via l'API favicon native de Chrome
+ * (chrome-extension://<id>/_favicon/?pageUrl=...). Local et instantané : contrairement à un
+ * service tiers, aucune requête réseau externe n'est faite et aucun domaine visité n'est
+ * partagé avec un service externe.
  * @param {string} url - L'URL du site
+ * @param {number} size - Taille souhaitée en pixels (16, 24, 32, 48, 64, 96, 128 ou 256)
  * @returns {string} - L'URL du favicon
  */
-function getFaviconUrl(url) {
+function getFaviconUrl(url, size = 32) {
     try {
-        const urlObj = new URL(url);
-        const domain = urlObj.hostname;
-        // Ancienne API Google
-        // return `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
-        
-        // Nouvelle API Vemetric
-        return `https://favicon.vemetric.com/${domain}?size=128`;
+        // Valide que l'URL du site est bien formée avant de la transmettre à l'API favicon
+        new URL(url);
+        const faviconUrl = new URL(chrome.runtime.getURL('/_favicon/'));
+        faviconUrl.searchParams.set('pageUrl', url);
+        faviconUrl.searchParams.set('size', size.toString());
+        return faviconUrl.toString();
     } catch (error) {
         // Si l'URL n'est pas valide, retourner un favicon par défaut
         return getDefaultFavicon();
@@ -24,26 +27,13 @@ function getFaviconUrl(url) {
 /**
  * Gère les erreurs de chargement de favicon avec fallback
  * @param {HTMLImageElement} img - L'élément image du favicon
- * @param {string} originalUrl - L'URL originale du site
+ * @param {string} originalUrl - L'URL originale du site (non utilisée, conservée pour compat d'appel)
  * @param {HTMLElement} loader - Le loader optionnel à cacher (pour newtab.js)
  */
 function handleFaviconError(img, originalUrl, loader = null) {
-    // if (img.src.includes('google.com/s2/favicons')) {
-    if (img.src.includes('favicon.vemetric.com')) {
-        try {
-            const urlObj = new URL(originalUrl);
-            img.src = `${urlObj.protocol}//${urlObj.hostname}/favicon.ico`;
-        } catch (error) {
-            img.src = getDefaultFavicon();
-            if (loader) {
-                hideFaviconLoader(img, loader);
-            }
-        }
-    } else {
-        img.src = getDefaultFavicon();
-        if (loader) {
-            hideFaviconLoader(img, loader);
-        }
+    img.src = getDefaultFavicon();
+    if (loader) {
+        hideFaviconLoader(img, loader);
     }
 }
 

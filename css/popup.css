@@ -213,6 +213,7 @@ body.dark-mode .space-card:hover {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 8px;
     margin-bottom: 8px;
 }
 
@@ -221,6 +222,82 @@ body.dark-mode .space-card:hover {
     font-size: 14px;
     color: var(--text-primary);
     letter-spacing: -0.01em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+    min-width: 0;
+}
+
+.space-name-input {
+    flex: 1;
+    min-width: 0;
+    font-weight: 600;
+    font-size: 14px;
+    font-family: inherit;
+    padding: 4px 6px;
+    border: 1px solid #4f46e5;
+    border-radius: 6px;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    outline: none;
+}
+
+.icon-btn {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: var(--bg-secondary);
+    cursor: pointer;
+    font-size: 13px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.icon-btn:hover {
+    background: var(--overlay-hover);
+    border-color: #4f46e5;
+    transform: translateY(-1px);
+}
+
+body.dark-mode .icon-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+body.dark-mode .icon-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(79, 70, 229, 0.4);
+}
+
+.space-favicons {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 10px;
+    min-height: 18px;
+    flex-wrap: wrap;
+}
+
+.space-favicon {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    object-fit: cover;
+    background: var(--bg-tertiary);
+    flex-shrink: 0;
+}
+
+.space-favicon-more {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-left: 2px;
 }
 
 .space-info {
