@@ -7,6 +7,9 @@ class BookmarkManager {
         this.currentDeleteFolderTitle = null;
         this.allFoldersExpanded = false;
         this.searchDebounceTimer = null;
+        this.activeIndex = -1;
+        this.gridView = false;
+        this.draggedBookmarkId = null;
         this.init();
     }
 
@@ -14,9 +17,39 @@ class BookmarkManager {
         await this.loadBookmarks();
         this.setupEventListeners();
         await this.setupDarkMode();
+        await this.setupViewToggle();
         this.renderBookmarks();
         this.setupTipsRotation();
         this.setupScrollToTop();
+    }
+
+    async setupViewToggle() {
+        const result = await chrome.storage.sync.get(['gridView']);
+        this.gridView = !!result.gridView;
+        this.applyViewMode();
+
+        const viewToggleBtn = document.getElementById('viewToggleBtn');
+        viewToggleBtn.addEventListener('click', async () => {
+            this.gridView = !this.gridView;
+            this.applyViewMode();
+            await chrome.storage.sync.set({ gridView: this.gridView });
+        });
+    }
+
+    applyViewMode() {
+        const container = document.getElementById('bookmarksContainer');
+        const viewToggleBtn = document.getElementById('viewToggleBtn');
+        container.classList.toggle('grid-view', this.gridView);
+
+        if (this.gridView) {
+            viewToggleBtn.innerHTML = '☰ Liste';
+            viewToggleBtn.title = 'Passer en vue liste';
+            viewToggleBtn.setAttribute('aria-label', "Changer l'affichage en vue liste");
+        } else {
+            viewToggleBtn.innerHTML = '⊞ Grille';
+            viewToggleBtn.title = 'Passer en vue grille';
+            viewToggleBtn.setAttribute('aria-label', "Changer l'affichage en vue grille");
+        }
     }
 
     async setupDarkMode() {
@@ -293,7 +326,7 @@ class BookmarkManager {
         searchInput.addEventListener('input', (e) => {
             const searchValue = e.target.value;
             this.updateClearSearchButton(searchValue);
-            
+
             // Debounce la recherche pour améliorer les performances
             clearTimeout(this.searchDebounceTimer);
             this.searchDebounceTimer = setTimeout(() => {
@@ -301,9 +334,15 @@ class BookmarkManager {
                 if (searchValue.trim() && !this.allFoldersExpanded) {
                     this.toggleAllFolders();
                 }
-                
+
                 this.filterBookmarks(searchValue);
             }, 200);
+        });
+
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter') {
+                this.handleSearchKeyNav(e);
+            }
         });
 
         clearSearchBtn.addEventListener('click', () => {
@@ -362,7 +401,46 @@ class BookmarkManager {
         });
     }
 
+    handleSearchKeyNav(e) {
+        const items = this.getVisibleBookmarkItems();
+        if (items.length === 0) return;
+
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            this.activeIndex = (this.activeIndex + 1) % items.length;
+            this.highlightActiveItem(items);
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            this.activeIndex = (this.activeIndex - 1 + items.length) % items.length;
+            this.highlightActiveItem(items);
+        } else if (e.key === 'Enter') {
+            const target = items[this.activeIndex] || items[0];
+            if (target && isUrlSafe(target.dataset.url)) {
+                e.preventDefault();
+                window.open(target.dataset.url, '_blank');
+            }
+        }
+    }
+
+    getVisibleBookmarkItems() {
+        const container = document.getElementById('bookmarksContainer');
+        // offsetParent est null quand un ancêtre (ex: un dossier replié) a display:none
+        return Array.from(container.querySelectorAll('.bookmark-item')).filter(el => el.offsetParent !== null);
+    }
+
+    highlightActiveItem(items) {
+        items.forEach((item, index) => {
+            if (index === this.activeIndex) {
+                item.classList.add('keyboard-active');
+                item.scrollIntoView({ block: 'nearest' });
+            } else {
+                item.classList.remove('keyboard-active');
+            }
+        });
+    }
+
     renderBookmarks(bookmarksToRender = null) {
+        this.activeIndex = -1;
         const container = document.getElementById('bookmarksContainer');
         const bookmarks = bookmarksToRender || this.bookmarks;
 
@@ -436,13 +514,14 @@ class BookmarkManager {
         
         const folderDiv = document.createElement('div');
         folderDiv.className = 'folder' + (collapsedByDefault && !this.allFoldersExpanded ? ' collapsed' : '');
+        folderDiv.dataset.id = folder.id;
         folderDiv.innerHTML = `
             <div class="folder-header">
                 <span class="folder-icon">📁</span>
                 <span class="folder-title">${escapeHtml(folder.title)}</span>
                 <span class="folder-count">${bookmarkCount}</span>
                 <div class="folder-actions">
-                    <button class="action-btn delete-folder-btn" title="Supprimer le dossier">
+                    <button class="action-btn delete-folder-btn" title="Supprimer le dossier" aria-label="Supprimer ce dossier">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M3 6h18"></path>
                             <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
@@ -475,21 +554,52 @@ class BookmarkManager {
             this.showDeleteFolderModal(folder.id, folder.title);
         });
 
+        // Dépose d'un favori sur l'en-tête du dossier : le déplace à l'intérieur
+        header.addEventListener('dragover', (e) => {
+            if (!this.draggedBookmarkId) return;
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            header.classList.add('drag-over-folder');
+        });
+
+        header.addEventListener('dragleave', () => {
+            header.classList.remove('drag-over-folder');
+        });
+
+        header.addEventListener('drop', async (e) => {
+            e.preventDefault();
+            header.classList.remove('drag-over-folder');
+            const bookmarkId = this.draggedBookmarkId;
+            if (!bookmarkId) return;
+
+            try {
+                await chrome.bookmarks.move(bookmarkId, { parentId: folder.id });
+                await this.loadBookmarks();
+                this.renderBookmarks();
+            } catch (error) {
+                console.error('Erreur lors du déplacement du favori:', error);
+            }
+        });
+
         return folderDiv;
     }
 
     createBookmarkElement(bookmark) {
         const bookmarkDiv = document.createElement('div');
         bookmarkDiv.className = 'bookmark-item';
-        
+        bookmarkDiv.draggable = true;
+        bookmarkDiv.dataset.url = bookmark.url;
+        bookmarkDiv.dataset.id = bookmark.id;
+        bookmarkDiv.dataset.parentId = bookmark.parentId;
+
         // Extraire le domaine pour le favicon
         const faviconUrl = getFaviconUrl(bookmark.url);
-        
+
         bookmarkDiv.innerHTML = `
             <div class="favicon-container" style="position: relative; width: 32px; height: 32px;">
                 <div class="favicon-loader"></div>
-                <img class="bookmark-favicon loading" 
-                     src="${faviconUrl}" 
+                <img class="bookmark-favicon loading"
+                     src="${faviconUrl}"
                      alt="Favicon"
                      loading="lazy"
                      style="position: absolute; top: 0; left: 0; width: 32px; height: 32px;">
@@ -499,8 +609,8 @@ class BookmarkManager {
                 <div class="bookmark-url">${escapeHtml(bookmark.url)}</div>
             </div>
             <div class="bookmark-actions">
-                <button class="action-btn edit-btn" title="Modifier">✏️</button>
-                <button class="action-btn delete-btn" title="Supprimer">
+                <button class="action-btn edit-btn" title="Modifier" aria-label="Modifier ce favori">✏️</button>
+                <button class="action-btn delete-btn" title="Supprimer" aria-label="Supprimer ce favori">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M3 6h18"></path>
                         <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
@@ -511,6 +621,8 @@ class BookmarkManager {
                 </button>
             </div>
         `;
+
+        this.setupBookmarkDragAndDrop(bookmarkDiv, bookmark);
 
         // Gestion du chargement et des erreurs de favicon
         const favicon = bookmarkDiv.querySelector('.bookmark-favicon');
@@ -573,6 +685,77 @@ class BookmarkManager {
         });
 
         return bookmarkDiv;
+    }
+
+    setupBookmarkDragAndDrop(bookmarkDiv, bookmark) {
+        bookmarkDiv.addEventListener('dragstart', (e) => {
+            this.draggedBookmarkId = bookmark.id;
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', bookmark.id);
+            bookmarkDiv.classList.add('dragging');
+        });
+
+        bookmarkDiv.addEventListener('dragend', () => {
+            this.draggedBookmarkId = null;
+            bookmarkDiv.classList.remove('dragging');
+            document.querySelectorAll('.drag-over-top, .drag-over-bottom, .drag-over-folder')
+                .forEach(el => el.classList.remove('drag-over-top', 'drag-over-bottom', 'drag-over-folder'));
+        });
+
+        bookmarkDiv.addEventListener('dragover', (e) => {
+            if (!this.draggedBookmarkId || this.draggedBookmarkId === bookmark.id) return;
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+
+            const rect = bookmarkDiv.getBoundingClientRect();
+            const isBefore = (e.clientY - rect.top) < rect.height / 2;
+            bookmarkDiv.classList.toggle('drag-over-top', isBefore);
+            bookmarkDiv.classList.toggle('drag-over-bottom', !isBefore);
+        });
+
+        bookmarkDiv.addEventListener('dragleave', () => {
+            bookmarkDiv.classList.remove('drag-over-top', 'drag-over-bottom');
+        });
+
+        bookmarkDiv.addEventListener('drop', async (e) => {
+            e.preventDefault();
+            const isBefore = bookmarkDiv.classList.contains('drag-over-top');
+            bookmarkDiv.classList.remove('drag-over-top', 'drag-over-bottom');
+
+            const draggedId = this.draggedBookmarkId;
+            if (!draggedId || draggedId === bookmark.id) return;
+
+            await this.handleBookmarkDrop(draggedId, bookmarkDiv, isBefore);
+        });
+    }
+
+    // Déplace draggedId juste avant/après targetEl, en tenant compte du décalage d'index
+    // que provoque chrome.bookmarks.move lorsqu'on déplace un favori au sein du même dossier
+    // (l'API réindexe après le retrait du nœud, donc une cible plus loin doit être décalée de -1).
+    async handleBookmarkDrop(draggedId, targetEl, dropBefore) {
+        try {
+            const targetParentId = targetEl.dataset.parentId;
+            const targetId = targetEl.dataset.id;
+            const siblings = await chrome.bookmarks.getChildren(targetParentId);
+            const targetIndex = siblings.findIndex(node => node.id === targetId);
+            if (targetIndex === -1) return;
+
+            let desiredIndex = dropBefore ? targetIndex : targetIndex + 1;
+
+            const [draggedNode] = await chrome.bookmarks.get(draggedId);
+            if (draggedNode.parentId === targetParentId) {
+                const draggedIndex = siblings.findIndex(node => node.id === draggedId);
+                if (draggedIndex !== -1 && draggedIndex < desiredIndex) {
+                    desiredIndex -= 1;
+                }
+            }
+
+            await chrome.bookmarks.move(draggedId, { parentId: targetParentId, index: desiredIndex });
+            await this.loadBookmarks();
+            this.renderBookmarks();
+        } catch (error) {
+            console.error('Erreur lors du réordonnancement du favori:', error);
+        }
     }
 
     countBookmarks(folder) {

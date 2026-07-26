@@ -1,9 +1,9 @@
 {
   "manifest_version": 3,
   "name": "Favospace bookmarks - New Tab",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "description": "Interface élégante pour gérer vos favoris et organiser vos onglets en espaces de travail (Travail, Perso, Projets...)",
-  "permissions": ["bookmarks", "activeTab", "tabs", "storage"],
+  "permissions": ["bookmarks", "activeTab", "tabs", "storage", "scripting", "favicon"],
   "chrome_url_overrides": {
     "newtab": "newtab.html"
   },
@@ -19,11 +19,10 @@
     },
     "default_title": "Gérer mes espaces de travail"
   },
-  "content_scripts": [
+  "web_accessible_resources": [
     {
-      "matches": ["<all_urls>"],
-      "js": ["js/utils.js", "js/content.js"],
-      "css": ["css/popup-styles.css"]
+      "resources": ["_favicon/*"],
+      "matches": ["<all_urls>"]
     }
   ],
   "commands": {

@@ -149,7 +149,8 @@
     color: inherit !important;
 }
 
-.favospace-bookmark-item:hover {
+.favospace-bookmark-item:hover,
+.favospace-bookmark-item.favospace-active {
     background: rgba(79, 70, 229, 0.15) !important;
     border-color: rgba(79, 70, 229, 0.3) !important;
     transform: translateY(-1px) !important;
